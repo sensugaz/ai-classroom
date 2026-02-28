@@ -49,9 +49,18 @@ export function useAudioPlayback(sampleRate = AUDIO_SAMPLE_RATE_OUTPUT) {
       source.connect(ctx.destination);
 
       source.onended = () => {
-        isPlayingRef.current = false;
-        // Play next in queue
-        playNext();
+        if (queueRef.current.length > 0) {
+          // More in queue — play immediately
+          isPlayingRef.current = false;
+          playNext();
+        } else {
+          // Queue empty — keep isPlaying true for 500ms cooldown
+          // so microphone doesn't pick up residual echo
+          setTimeout(() => {
+            isPlayingRef.current = false;
+            setIsPlaying(false);
+          }, 500);
+        }
       };
 
       source.start(0);

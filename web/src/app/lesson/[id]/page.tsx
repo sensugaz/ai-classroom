@@ -32,7 +32,13 @@ export default function LessonPage() {
   const [initialized, setInitialized] = useState(false);
 
   // Audio playback
-  const { enqueue: enqueueAudio, close: closePlayback } = useAudioPlayback();
+  const { isPlaying, enqueue: enqueueAudio, close: closePlayback } = useAudioPlayback();
+  const isPlayingRef = useRef(false);
+
+  // Keep ref in sync for use in audio callback
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
 
   // WebSocket
   const {
@@ -47,9 +53,10 @@ export default function LessonPage() {
   });
 
   // Audio recorder (for real-time mode)
+  // Skip sending audio while TTS is playing to prevent feedback loop
   const { isRecording, startRecording, stopRecording } = useAudioRecorder({
     onAudioData: (data) => {
-      if (status === 'active' && mode === 'realtime') {
+      if (status === 'active' && mode === 'realtime' && !isPlayingRef.current) {
         sendAudio(data);
       }
     },
