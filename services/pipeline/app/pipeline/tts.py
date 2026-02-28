@@ -38,7 +38,7 @@ class TtsProcessor:
         from kokoro import KPipeline
 
         logger.info("Loading Kokoro TTS...")
-        self._kokoro_pipeline = KPipeline(lang_code='a')
+        self._kokoro_pipeline = KPipeline(lang_code='a', trf=False)
         self._kokoro_lang = 'a'
         self._loaded = True
         self.sample_rate = 24000
@@ -59,7 +59,7 @@ class TtsProcessor:
         # Re-create pipeline if language changed
         if self._kokoro_lang != lang_code:
             from kokoro import KPipeline
-            self._kokoro_pipeline = KPipeline(lang_code=lang_code)
+            self._kokoro_pipeline = KPipeline(lang_code=lang_code, trf=False)
             self._kokoro_lang = lang_code
 
         logger.info("[TTS] Kokoro [voice=%s, lang=%s]: %s", kokoro_voice, lang_code, text[:80])
