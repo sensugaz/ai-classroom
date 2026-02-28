@@ -72,13 +72,13 @@ class TranslateProcessor:
         src_code = LANG_CODES.get(source_lang, f"{source_lang}_Latn")
         tgt_code = LANG_CODES.get(target_lang, f"{target_lang}_Latn")
 
-        # Limit max output length based on input (prevent hallucination)
-        # Thai/CJK have no spaces, so count characters instead of words
-        input_words = len(text.split())
-        input_chars = len(text)
-        # Use whichever gives a better estimate
-        estimated_tokens = max(input_words, input_chars // 2)
-        self._max_length = max(estimated_tokens * 3, 10)  # at most 3x, min 10
+        # Use actual tokenizer to count input tokens (accurate for Thai/CJK)
+        self.tokenizer.src_lang = src_code
+        input_ids = self.tokenizer(text, return_tensors=None)["input_ids"]
+        input_token_count = len(input_ids)
+        # Output should be at most 2x input tokens, minimum 6
+        self._max_length = max(input_token_count * 2, 6)
+        logger.debug("Input: %r (%d tokens) → max_length=%d", text, input_token_count, self._max_length)
 
         if self.translator is not None:
             result = self._translate_ct2(text, src_code, tgt_code)
@@ -87,8 +87,8 @@ class TranslateProcessor:
 
         # Post-process: detect and truncate hallucination
         result = self._remove_repetition(result)
-        # Trim to roughly match expected output length
-        result = self._trim_excess(result, estimated_tokens)
+        # Trim: output words should not exceed 2x input tokens
+        result = self._trim_excess(result, input_token_count)
         return result
 
     @staticmethod
@@ -118,16 +118,16 @@ class TranslateProcessor:
         return text
 
     @staticmethod
-    def _trim_excess(text: str, input_token_estimate: int) -> str:
+    def _trim_excess(text: str, input_token_count: int) -> str:
         """Trim output if it's way longer than expected (sign of hallucination)."""
         words = text.split()
-        max_words = max(input_token_estimate * 3, 8)
+        max_words = max(input_token_count * 2, 5)
         if len(words) > max_words:
             # Cut at last sentence boundary within limit
             trimmed = " ".join(words[:max_words])
             for sep in [".", "!", "?"]:
                 idx = trimmed.rfind(sep)
-                if idx > len(trimmed) // 2:
+                if idx > len(trimmed) // 3:
                     return trimmed[:idx + 1]
             return trimmed
         return text
