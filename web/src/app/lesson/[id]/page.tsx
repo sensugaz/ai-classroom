@@ -228,39 +228,26 @@ export default function LessonPage() {
   return (
     <main className="h-screen h-[100dvh] flex flex-col bg-gradient-to-b from-slate-50 to-indigo-50/30">
       {/* Top Bar */}
-      <header className="shrink-0 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 py-3">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <span className="text-2xl">🎓</span>
-            <div className="min-w-0">
-              <h1 className="text-lg font-extrabold font-nunito text-slate-800 truncate">
-                {className || 'Lesson'}
-              </h1>
-            </div>
+      <header className="shrink-0 bg-white/90 backdrop-blur-md border-b border-slate-200 px-3 sm:px-4 py-2 sm:py-3">
+        <div className="flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-xl sm:text-2xl">🎓</span>
+            <h1 className="text-sm sm:text-lg font-extrabold font-nunito text-slate-800 truncate">
+              {className || 'Lesson'}
+            </h1>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Timer */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 rounded-xl">
-              <span className="text-sm">⏱️</span>
-              <span className="text-base font-bold font-nunito text-slate-700 tabular-nums">
+            <div className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 bg-slate-100 rounded-lg sm:rounded-xl">
+              <span className="text-xs sm:text-sm font-bold font-nunito text-slate-700 tabular-nums">
                 {formatElapsed(elapsedTime)}
               </span>
             </div>
 
-            {/* Status Badge */}
-            <span
-              className={`
-                px-3 py-1.5 rounded-xl text-sm font-bold font-nunito capitalize
-                ${statusBadge()}
-              `}
-            >
-              {status}
-            </span>
-
             {/* Connection Indicator */}
             <span
-              className={`w-3 h-3 rounded-full ${
+              className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${
                 isConnected ? 'bg-emerald-400' : 'bg-slate-300'
               }`}
               title={isConnected ? 'Connected' : 'Disconnected'}
@@ -288,7 +275,7 @@ export default function LessonPage() {
       <TranscriptPanel />
 
       {/* Bottom area - Status / PTT */}
-      <div className="shrink-0 px-4 py-4 bg-white/60 backdrop-blur-sm border-t border-slate-200">
+      <div className="shrink-0 px-3 sm:px-4 py-3 sm:py-4 bg-white/60 backdrop-blur-sm border-t border-slate-200 pb-safe">
         {mode === 'realtime' ? (
           <StatusIndicator status={processingStatus} isSpeaking={isSpeaking} />
         ) : (
