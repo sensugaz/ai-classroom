@@ -72,10 +72,44 @@ class TranslateProcessor:
         src_code = LANG_CODES.get(source_lang, f"{source_lang}_Latn")
         tgt_code = LANG_CODES.get(target_lang, f"{target_lang}_Latn")
 
+        # Limit max output length based on input (prevent hallucination)
+        input_tokens = len(text.split())
+        self._max_length = max(input_tokens * 4, 20)  # at most 4x input words, min 20
+
         if self.translator is not None:
-            return self._translate_ct2(text, src_code, tgt_code)
+            result = self._translate_ct2(text, src_code, tgt_code)
         else:
-            return self._translate_hf(text, src_code, tgt_code)
+            result = self._translate_hf(text, src_code, tgt_code)
+
+        # Post-process: detect and truncate hallucination (repeated phrases)
+        result = self._remove_repetition(result)
+        return result
+
+    @staticmethod
+    def _remove_repetition(text: str) -> str:
+        """Remove repeated phrases that indicate hallucination."""
+        words = text.split()
+        if len(words) <= 4:
+            return text
+
+        # Check for repeated n-grams (2-5 words)
+        for n in range(2, 6):
+            if len(words) < n * 2:
+                continue
+            for i in range(len(words) - n):
+                phrase = words[i:i + n]
+                # Count how many times this phrase repeats consecutively
+                repeats = 1
+                j = i + n
+                while j + n <= len(words) and words[j:j + n] == phrase:
+                    repeats += 1
+                    j += n
+                if repeats >= 3:
+                    # Hallucination detected — keep only first occurrence
+                    logger.warning("Hallucination detected: '%s' repeated %dx, truncating",
+                                   " ".join(phrase), repeats)
+                    return " ".join(words[:i + n])
+        return text
 
     def _translate_ct2(self, text: str, src_code: str, tgt_code: str) -> str:
         """Translate using CTranslate2."""
@@ -87,8 +121,8 @@ class TranslateProcessor:
             [token_strs],
             target_prefix=[[tgt_code]],
             beam_size=2,
-            max_decoding_length=128,
-            repetition_penalty=1.3,
+            max_decoding_length=min(self._max_length, 64),
+            repetition_penalty=1.5,
         )
 
         output_tokens = results[0].hypotheses[0][1:]  # Skip target lang token
@@ -111,9 +145,9 @@ class TranslateProcessor:
             outputs = self._hf_model.generate(
                 **inputs,
                 forced_bos_token_id=tgt_lang_id,
-                max_new_tokens=128,
+                max_new_tokens=min(self._max_length, 64),
                 num_beams=2,
-                repetition_penalty=1.3,
+                repetition_penalty=1.5,
                 no_repeat_ngram_size=3,
             )
 
