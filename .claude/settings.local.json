@@ -23,7 +23,9 @@
       "Bash(docker build ./root/project/web 2>&1 | tail -50)",
       "Bash(mkdir -p /root/project/nginx/certs && openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /root/project/nginx/certs/selfsigned.key -out /root/project/nginx/certs/selfsigned.crt -subj \"/C=TH/ST=Bangkok/L=Bangkok/O=Classroom/CN=172.25.110.23\" 2>&1)",
       "Bash(git add services/pipeline/scripts/download_voices.py)",
-      "Bash(git add -A && git diff --cached --stat)"
+      "Bash(git add -A && git diff --cached --stat)",
+      "Bash(git commit -m \"$\\(cat <<'EOF'\nSwitch NLLB from 3.3B to distilled-600M for faster translation\n\n3.3B model causes 4-5s latency and hallucination on short phrases.\n600M is 5-10x faster \\(~200-500ms\\) with acceptable quality.\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push)"
     ]
   }
 }
