@@ -21,16 +21,39 @@ class SttProcessor:
         if self.api_key:
             from elevenlabs.client import ElevenLabs
             self.client = ElevenLabs(api_key=self.api_key)
-            logger.info("STT: ElevenLabs Scribe v2 ready")
+            # Test connection with a tiny silent audio
+            try:
+                buf = io.BytesIO()
+                silence = np.zeros(8000, dtype=np.float32)  # 0.5s silence
+                sf.write(buf, silence, 16000, format='WAV', subtype='PCM_16')
+                buf.seek(0)
+                buf.name = "test.wav"
+                self.client.speech_to_text.convert(
+                    file=buf,
+                    model_id="scribe_v2",
+                    language_code="eng",
+                )
+                logger.info("✅ STT: ElevenLabs Scribe v2 connected successfully (API key valid)")
+            except Exception as e:
+                logger.error("❌ STT: ElevenLabs connection FAILED: %s", e)
+                logger.warning("STT: Falling back to local Whisper")
+                self.client = None
+                self._load_whisper()
+                return
         else:
-            from faster_whisper import WhisperModel
-            compute_type = "float16" if self.device == "cuda" else "int8"
-            self.model = WhisperModel(
-                self.model_size,
-                device=self.device,
-                compute_type=compute_type,
-            )
-            logger.info("STT: faster-whisper %s loaded on %s (no API key)", self.model_size, self.device)
+            logger.warning("⚠️ STT: No ELEVENLABS_API_KEY set, using local Whisper")
+            self._load_whisper()
+
+    def _load_whisper(self):
+        """Load local faster-whisper as fallback."""
+        from faster_whisper import WhisperModel
+        compute_type = "float16" if self.device == "cuda" else "int8"
+        self.model = WhisperModel(
+            self.model_size,
+            device=self.device,
+            compute_type=compute_type,
+        )
+        logger.info("STT: faster-whisper %s loaded on %s", self.model_size, self.device)
 
     def transcribe(self, audio: np.ndarray, language: str = "th", sample_rate: int = 16000) -> str:
         duration = len(audio) / sample_rate
