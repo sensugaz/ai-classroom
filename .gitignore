@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build
+.next/
+out/
+dist/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Volumes & data
+volumes/
+*.db
+
+# Model cache
+model-cache/
+*.pt
+*.bin
+*.onnx
+*.ct2
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/
+
+# Go
+tmp/
+
+# Logs
+*.log

@@ -1,0 +1,13 @@
+Name: classroom-api
+Host: 0.0.0.0
+Port: 8080
+
+Mongo:
+  Uri: mongodb://mongodb:27017/classroom
+
+PipelineWsUrl: ws://pipeline:9000/ws
+
+OpenRouter:
+  ApiKey: ""
+  BaseUrl: https://openrouter.ai/api/v1
+  Model: anthropic/claude-3.5-sonnet

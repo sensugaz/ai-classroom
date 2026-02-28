@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(which go && go version 2>/dev/null; which node && node --version 2>/dev/null; which docker && docker --version 2>/dev/null; which goctl 2>/dev/null)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__plugin_context7_context7__query-docs",
+      "Bash(find /root/project -maxdepth 3 -type f -name \"*.yml\" -o -name \"*.yaml\" -o -name \"docker-compose*\" -o -name \"Dockerfile*\" -o -name \".env*\" -o -name \"*.mod\" -o -name \"*.sum\" -o -name \"package.json\" -o -name \"requirements*.txt\" -o -name \"*.api\" 2>/dev/null | sort)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:deepwiki.com)",
+      "WebFetch(domain:go-zero.dev)",
+      "WebFetch(domain:speaches.ai)",
+      "WebFetch(domain:brainsteam.co.uk)",
+      "Bash(git init && git add README.md && git commit -m \"first commit\" && git branch -M main && git remote add origin git@github.com:sensugaz/ai-classroom.git && git push -u origin main)",
+      "Bash(echo \"# ai-classroom\" > README.md && git add -A && git commit -m \"first commit\" && git branch -M main && git remote add origin git@github.com:sensugaz/ai-classroom.git && git push -u origin main)",
+      "Bash(git config user.email \"jiw.kittipong@devdogdog.com\" && git config user.name \"sensugaz\" && git add -A && git commit -m \"first commit\" && git branch -M main && git push -u origin main)"
+    ]
+  }
+}
