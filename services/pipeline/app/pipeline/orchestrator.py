@@ -19,7 +19,7 @@ class PipelineOrchestrator:
     def __init__(self):
         self.denoise = DenoiseProcessor()
         self.vad = VadProcessor(threshold=settings.vad_threshold)
-        self.stt = SttProcessor(model_size=settings.whisper_model, device=settings.device)
+        self.stt = SttProcessor(api_key=settings.openai_api_key, model_size=settings.whisper_model, device=settings.device)
         self.translate = TranslateProcessor(model_name=settings.translate_model, device=settings.device)
         self.tts = TtsProcessor(device=settings.device, voice_presets_dir=settings.voice_presets_dir)
         self.postprocess = SttPostProcessor(device=settings.device)
@@ -38,7 +38,8 @@ class PipelineOrchestrator:
 
         t0 = time.time()
         self.stt.load()
-        logger.info("[LOAD] STT (Whisper %s): %.1fs", settings.whisper_model, time.time() - t0)
+        stt_label = "OpenAI" if settings.openai_api_key else f"Whisper {settings.whisper_model}"
+        logger.info("[LOAD] STT (%s): %.1fs", stt_label, time.time() - t0)
 
         t0 = time.time()
         self.translate.load()

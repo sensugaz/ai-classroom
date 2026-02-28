@@ -1,44 +1,89 @@
-"""faster-whisper STT - runs on GPU (~300ms)."""
+"""OpenAI gpt-4o-mini-transcribe STT via API."""
 
+import io
 import logging
 import numpy as np
+import soundfile as sf
 
 logger = logging.getLogger(__name__)
 
 
 class SttProcessor:
-    def __init__(self, model_size: str = "large-v3", device: str = "cuda"):
-        self.model_size = model_size
+    def __init__(self, api_key: str = "", device: str = "cuda", model_size: str = "large-v3"):
+        self.api_key = api_key
         self.device = device
-        self.model = None
+        self.model_size = model_size
+        self.client = None
+        self.model = None  # local whisper fallback
 
     def load(self):
-        """Load faster-whisper model."""
-        from faster_whisper import WhisperModel
-
-        compute_type = "float16" if self.device == "cuda" else "int8"
-        self.model = WhisperModel(
-            self.model_size,
-            device=self.device,
-            compute_type=compute_type,
-        )
-        logger.info("faster-whisper %s loaded on %s", self.model_size, self.device)
+        """Load OpenAI client or fall back to local Whisper."""
+        if self.api_key:
+            from openai import OpenAI
+            self.client = OpenAI(api_key=self.api_key)
+            logger.info("STT: OpenAI gpt-4o-mini-transcribe ready")
+        else:
+            from faster_whisper import WhisperModel
+            compute_type = "float16" if self.device == "cuda" else "int8"
+            self.model = WhisperModel(
+                self.model_size,
+                device=self.device,
+                compute_type=compute_type,
+            )
+            logger.info("STT: faster-whisper %s loaded on %s (no API key)", self.model_size, self.device)
 
     def transcribe(self, audio: np.ndarray, language: str = "th", sample_rate: int = 16000) -> str:
-        if self.model is None:
-            raise RuntimeError("STT model not loaded")
-
         duration = len(audio) / sample_rate
         if duration < 0.3:
             logger.info("STT: audio too short (%.2fs), skipping", duration)
             return ""
 
-        # Energy check — skip silent/quiet audio to prevent hallucination
+        # Energy check — skip silent audio to prevent hallucination
         rms = float(np.sqrt(np.mean(audio ** 2)))
         if rms < 0.01:
             logger.info("STT: audio too quiet (rms=%.4f), skipping", rms)
             return ""
 
+        if self.client:
+            return self._transcribe_openai(audio, language, sample_rate, duration)
+        elif self.model:
+            return self._transcribe_local(audio, language, sample_rate, duration)
+        else:
+            raise RuntimeError("STT model not loaded")
+
+    def _transcribe_openai(self, audio: np.ndarray, language: str, sample_rate: int, duration: float) -> str:
+        """Transcribe using OpenAI API."""
+        try:
+            # Convert numpy to WAV in memory
+            buf = io.BytesIO()
+            sf.write(buf, audio, sample_rate, format='WAV', subtype='PCM_16')
+            buf.seek(0)
+            buf.name = "audio.wav"
+
+            result = self.client.audio.transcriptions.create(
+                model="gpt-4o-mini-transcribe",
+                file=buf,
+                language=language,
+            )
+
+            text = result.text.strip() if result.text else ""
+
+            # Sanity check: output too long for audio duration
+            max_chars_per_sec = 80
+            if text and len(text) > duration * max_chars_per_sec:
+                logger.warning("STT: output too long for %.1fs audio (%d chars), likely hallucination: %s",
+                               duration, len(text), text[:60])
+                return ""
+
+            if text:
+                logger.info("STT [%s] (%.1fs) OpenAI: %s", language, duration, text)
+            return text
+        except Exception as e:
+            logger.error("STT OpenAI failed: %s", e)
+            return ""
+
+    def _transcribe_local(self, audio: np.ndarray, language: str, sample_rate: int, duration: float) -> str:
+        """Transcribe using local faster-whisper."""
         segments, info = self.model.transcribe(
             audio,
             language=language,
@@ -86,7 +131,6 @@ class SttProcessor:
         if len(words) <= 2:
             return text
 
-        # Cap to prevent O(n^3) on long hallucinations
         words = words[:200]
 
         for n in range(1, 7):
@@ -105,4 +149,3 @@ class SttProcessor:
                     return " ".join(words[:i + n])
 
         return " ".join(words)
-
