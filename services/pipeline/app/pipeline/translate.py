@@ -15,6 +15,8 @@ LANG_CODES = {
     "my": "mya_Mymr",
     "lo": "lao_Laoo",
     "km": "khm_Khmr",
+    "es": "spa_Latn",
+    "fr": "fra_Latn",
 }
 
 
@@ -29,7 +31,6 @@ class TranslateProcessor:
         """Load NLLB model via CTranslate2 for optimized inference."""
         try:
             import ctranslate2
-            import sentencepiece as spm
             from transformers import AutoTokenizer
 
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
@@ -64,16 +65,7 @@ class TranslateProcessor:
         logger.info("NLLB loaded via transformers on %s", self.device)
 
     def translate(self, text: str, source_lang: str = "th", target_lang: str = "en") -> str:
-        """Translate text between languages.
-
-        Args:
-            text: Source text
-            source_lang: Source language code (2-letter)
-            target_lang: Target language code (2-letter)
-
-        Returns:
-            Translated text string
-        """
+        """Translate text between languages."""
         if not text.strip():
             return ""
 
@@ -94,7 +86,9 @@ class TranslateProcessor:
         results = self.translator.translate_batch(
             [token_strs],
             target_prefix=[[tgt_code]],
-            beam_size=4,
+            beam_size=2,
+            max_decoding_length=128,
+            repetition_penalty=1.3,
         )
 
         output_tokens = results[0].hypotheses[0][1:]  # Skip target lang token
@@ -117,8 +111,10 @@ class TranslateProcessor:
             outputs = self._hf_model.generate(
                 **inputs,
                 forced_bos_token_id=tgt_lang_id,
-                max_new_tokens=256,
-                num_beams=4,
+                max_new_tokens=128,
+                num_beams=2,
+                repetition_penalty=1.3,
+                no_repeat_ngram_size=3,
             )
 
         result = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
