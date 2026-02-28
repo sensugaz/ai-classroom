@@ -5,19 +5,6 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
-# Common Thai Whisper hallucination phrases (YouTube outros, etc.)
-_HALLUCINATION_PHRASES = {
-    "ขอบคุณที่ติดตาม",
-    "ขอบคุณที่รับชม",
-    "อย่าลืมกดไลค์",
-    "อย่าลืมกดติดตาม",
-    "กดกระดิ่ง",
-    "กดซับสไครป์",
-    "โปรดติดตามตอนต่อไป",
-    "ฝากกดไลค์",
-    "ฝากกดแชร์",
-}
-
 
 class SttProcessor:
     def __init__(self, model_size: str = "large-v3", device: str = "cuda"):
@@ -72,9 +59,6 @@ class SttProcessor:
         # Remove repeated words/phrases (hallucination pattern)
         text = self._remove_repetition(text)
 
-        # Remove known hallucination phrases
-        text = self._remove_hallucinations(text)
-
         # Sanity check: output too long for audio duration
         max_chars_per_sec = 80
         if text and len(text) > duration * max_chars_per_sec:
@@ -116,15 +100,3 @@ class SttProcessor:
 
         return " ".join(words)
 
-    @staticmethod
-    def _remove_hallucinations(text: str) -> str:
-        """Remove known Thai Whisper hallucination phrases."""
-        original = text
-        for phrase in _HALLUCINATION_PHRASES:
-            text = text.replace(phrase, "")
-        text = " ".join(text.split())  # clean up whitespace
-
-        if text != original:
-            logger.warning("STT: removed hallucination phrases: '%s' -> '%s'", original, text)
-
-        return text
