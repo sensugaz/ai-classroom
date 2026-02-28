@@ -24,7 +24,7 @@ export default function VoiceSelector({ value, onChange, targetLang }: VoiceSele
             <button
               key={voice.type}
               type="button"
-              onClick={() => onChange(voice.type)}
+              onClick={() => onChange(voice.type as VoiceType)}
               className={`
                 relative flex flex-col items-center gap-2
                 p-6 rounded-3xl

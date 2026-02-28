@@ -8,7 +8,7 @@ Mongo:
 Redis:
   Host: redis:6379
 
-PipelineWsUrl: ws://pipeline:9000/ws
+PipelineWsUrl: wss://color-moved-slot-region.trycloudflare.com/ws
 
 OpenRouter:
   ApiKey: ""

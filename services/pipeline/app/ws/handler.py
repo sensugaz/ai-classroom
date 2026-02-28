@@ -38,6 +38,9 @@ class ConnectionHandler:
             while True:
                 raw = await ws.receive()
 
+                if raw.get("type") == "websocket.disconnect":
+                    break
+
                 if raw.get("bytes"):
                     # Binary frame = audio data (PCM 16-bit 16kHz mono)
                     await self._handle_audio(ws, session, raw["bytes"])
@@ -45,8 +48,8 @@ class ConnectionHandler:
                     # JSON text frame = control message
                     await self._handle_text(ws, session, raw["text"])
 
-        except WebSocketDisconnect:
-            logger.info("WebSocket disconnected: %s", session.session_id)
+        except (WebSocketDisconnect, RuntimeError):
+            pass
         except Exception as e:
             logger.exception("WebSocket error: %s", e)
             try:

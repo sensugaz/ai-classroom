@@ -1,12 +1,12 @@
 export const API_URL =
   typeof window !== 'undefined'
-    ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080')
-    : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080');
+    ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost')
+    : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost');
 
 export const WS_URL =
   typeof window !== 'undefined'
-    ? (process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8080')
-    : (process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8080');
+    ? (process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost')
+    : (process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost');
 
 export const AUDIO_SAMPLE_RATE_INPUT = 16000;   // 16 kHz for mic capture
 export const AUDIO_SAMPLE_RATE_OUTPUT = 24000;   // 24 kHz for TTS playback

@@ -4,6 +4,12 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml* ./
 RUN pnpm install --frozen-lockfile || pnpm install
 COPY . .
+
+ARG NEXT_PUBLIC_API_URL=https://172.25.110.23
+ARG NEXT_PUBLIC_WS_URL=wss://172.25.110.23
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL
+
 RUN pnpm run build
 
 FROM node:20-alpine
