@@ -72,11 +72,8 @@ class PipelineOrchestrator:
         audio = self._pcm_to_float(audio_bytes)
         audio_dur = len(audio) / settings.sample_rate
 
-        # Step 1: Denoise
-        t0 = time.time()
-        if session.denoise:
-            audio = self.denoise.process(audio, settings.sample_rate)
-        denoise_ms = (time.time() - t0) * 1000
+        # Step 1: Denoise (disabled - adds latency, Whisper handles noise well)
+        denoise_ms = 0
 
         # Step 2: VAD
         t0 = time.time()
@@ -157,11 +154,8 @@ class PipelineOrchestrator:
 
         result = {}
 
-        # Step 1: Denoise
-        t0 = time.time()
-        if session.denoise:
-            audio = self.denoise.process(audio, settings.sample_rate)
-        denoise_ms = (time.time() - t0) * 1000
+        # Step 1: Denoise (disabled - adds latency, Whisper handles noise well)
+        denoise_ms = 0
 
         # Step 2: STT
         t0 = time.time()
