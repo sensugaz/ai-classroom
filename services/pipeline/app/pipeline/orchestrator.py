@@ -49,7 +49,9 @@ class PipelineOrchestrator:
         self.tts.load()
         logger.info("[LOAD] TTS: %.1fs", time.time() - t0)
 
-        if settings.stt_postprocess:
+        # Only load post-processor for local Whisper (OpenAI has built-in post-processing)
+        self._use_postprocess = settings.stt_postprocess and not settings.openai_api_key
+        if self._use_postprocess:
             t0 = time.time()
             self.postprocess.load()
             logger.info("[LOAD] STT PostProcess (Qwen): %.1fs", time.time() - t0)
@@ -158,7 +160,7 @@ class PipelineOrchestrator:
 
         # Step 2.5: PostProcess STT
         postprocess_ms = 0
-        if transcript.strip() and settings.stt_postprocess:
+        if transcript.strip() and self._use_postprocess:
             t0 = time.time()
             transcript = self.postprocess.process(transcript, audio_duration=audio_dur)
             postprocess_ms = (time.time() - t0) * 1000
