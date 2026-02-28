@@ -5,23 +5,34 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
-# Kokoro voice mapping — natural human voices
-_KOKORO_VOICES = {
-    "adult_female": "af_heart",      # warm, natural female
-    "adult_male": "am_michael",       # clear, natural male
-    "child_female": "af_bella",       # lighter female voice
-    "child_male": "am_adam",          # lighter male voice
-}
-
 # Kokoro language codes
 _KOKORO_LANG_CODES = {
     "en": "a",   # American English
-    "th": "a",   # Thai not supported — use English voice for translated text
-    "es": "e",   # Spanish
-    "fr": "f",   # French
+    "th": "a",   # Thai not supported — use English voice
     "ja": "j",   # Japanese
-    "ko": "k",   # Korean
-    "zh": "z",   # Chinese
+    "zh": "z",   # Mandarin Chinese
+}
+
+# Kokoro voice mapping per language
+_KOKORO_VOICES = {
+    "en": {
+        "adult_female": "af_heart",
+        "adult_male": "am_michael",
+        "child_female": "af_bella",
+        "child_male": "am_adam",
+    },
+    "ja": {
+        "adult_female": "jf_alpha",
+        "adult_male": "jm_kumo",
+        "child_female": "jf_gongitsune",
+        "child_male": "jm_kumo",
+    },
+    "zh": {
+        "adult_female": "zf_xiaobei",
+        "adult_male": "zm_yunjian",
+        "child_female": "zf_xiaoni",
+        "child_male": "zm_yunxi",
+    },
 }
 
 
@@ -53,8 +64,9 @@ class TtsProcessor:
             logger.warning("[TTS] Not loaded → silence")
             return self._silence(text)
 
-        kokoro_voice = _KOKORO_VOICES.get(voice, "af_heart")
         lang_code = _KOKORO_LANG_CODES.get(language, "a")
+        lang_voices = _KOKORO_VOICES.get(language, _KOKORO_VOICES["en"])
+        kokoro_voice = lang_voices.get(voice, list(lang_voices.values())[0])
 
         # Re-create pipeline if language changed
         if self._kokoro_lang != lang_code:
@@ -82,11 +94,14 @@ class TtsProcessor:
 
     def list_voices(self) -> list[dict]:
         """List available voices."""
-        return [
-            {"id": f"en/{vt}", "voice_type": vt, "language": "en",
-             "name": vt.replace("_", " ").title(), "kokoro_voice": kid}
-            for vt, kid in _KOKORO_VOICES.items()
-        ]
+        result = []
+        for lang, voices in _KOKORO_VOICES.items():
+            for vt, kid in voices.items():
+                result.append({
+                    "id": f"{lang}/{vt}", "voice_type": vt, "language": lang,
+                    "name": vt.replace("_", " ").title(), "kokoro_voice": kid,
+                })
+        return result
 
     def _silence(self, text: str) -> bytes:
         word_count = max(len(text.split()), 1)

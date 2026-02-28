@@ -18,9 +18,6 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'en', name: 'English', nativeName: 'English', flag: '🇬🇧' },
   { code: 'zh', name: 'Chinese', nativeName: '中文', flag: '🇨🇳' },
   { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵' },
-  { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
-  { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
-  { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
 ];
 
 export const VOICE_OPTIONS: Record<string, VoiceOption[]> = {
@@ -35,6 +32,18 @@ export const VOICE_OPTIONS: Record<string, VoiceOption[]> = {
     { type: 'adult_female', label: 'Adult Female', icon: '👩‍🏫', description: 'Warm, friendly voice' },
     { type: 'child_male', label: 'Child Male', icon: '👦', description: 'Young, energetic voice' },
     { type: 'child_female', label: 'Child Female', icon: '👧', description: 'Young, bright voice' },
+  ],
+  zh: [
+    { type: 'adult_male', label: '男声', icon: '👨‍🏫', description: '成熟男性声音' },
+    { type: 'adult_female', label: '女声', icon: '👩‍🏫', description: '温柔女性声音' },
+    { type: 'child_male', label: '男孩', icon: '👦', description: '年轻男性声音' },
+    { type: 'child_female', label: '女孩', icon: '👧', description: '年轻女性声音' },
+  ],
+  ja: [
+    { type: 'adult_male', label: '男性', icon: '👨‍🏫', description: '落ち着いた男性の声' },
+    { type: 'adult_female', label: '女性', icon: '👩‍🏫', description: '優しい女性の声' },
+    { type: 'child_male', label: '男の子', icon: '👦', description: '元気な男の子の声' },
+    { type: 'child_female', label: '女の子', icon: '👧', description: '明るい女の子の声' },
   ],
 };
 
