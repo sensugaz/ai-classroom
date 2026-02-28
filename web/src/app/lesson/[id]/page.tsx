@@ -57,7 +57,7 @@ export default function LessonPage() {
   // During silence: send audio normally
   const BARGE_IN_THRESHOLD = 0.08; // RMS threshold to detect real speech over echo
 
-  const { isRecording, startRecording, stopRecording } = useAudioRecorder({
+  const { isRecording, isSpeaking, startRecording, stopRecording } = useAudioRecorder({
     onAudioData: (data) => {
       if (status !== 'active' || mode !== 'realtime') return;
 
@@ -290,7 +290,7 @@ export default function LessonPage() {
       {/* Bottom area - Status / PTT */}
       <div className="shrink-0 px-4 py-4 bg-white/60 backdrop-blur-sm border-t border-slate-200">
         {mode === 'realtime' ? (
-          <StatusIndicator status={processingStatus} />
+          <StatusIndicator status={processingStatus} isSpeaking={isSpeaking} />
         ) : (
           <div className="flex justify-center">
             <PushToTalkButton

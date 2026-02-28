@@ -8,11 +8,15 @@ interface UseAudioRecorderOptions {
   sampleRate?: number;
 }
 
+const SPEAKING_THRESHOLD = 0.02; // RMS threshold to detect speech
+const SILENCE_DELAY = 500; // ms of silence before "stopped speaking"
+
 export function useAudioRecorder({
   onAudioData,
   sampleRate = AUDIO_SAMPLE_RATE_INPUT,
 }: UseAudioRecorderOptions = {}) {
   const [isRecording, setIsRecording] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,6 +24,7 @@ export function useAudioRecorder({
   const audioContextRef = useRef<AudioContext | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const startRecording = useCallback(async () => {
     try {
@@ -51,6 +56,28 @@ export function useAudioRecorder({
 
       processor.onaudioprocess = (event) => {
         const inputData = event.inputBuffer.getChannelData(0);
+
+        // Calculate RMS for speech detection
+        let sumSq = 0;
+        for (let i = 0; i < inputData.length; i++) {
+          sumSq += inputData[i] * inputData[i];
+        }
+        const rms = Math.sqrt(sumSq / inputData.length);
+
+        if (rms > SPEAKING_THRESHOLD) {
+          if (silenceTimerRef.current) {
+            clearTimeout(silenceTimerRef.current);
+            silenceTimerRef.current = null;
+          }
+          setIsSpeaking(true);
+        } else {
+          if (!silenceTimerRef.current) {
+            silenceTimerRef.current = setTimeout(() => {
+              setIsSpeaking(false);
+              silenceTimerRef.current = null;
+            }, SILENCE_DELAY);
+          }
+        }
 
         // Convert Float32 to Int16 PCM
         const pcmData = new Int16Array(inputData.length);
@@ -96,11 +123,17 @@ export function useAudioRecorder({
       streamRef.current = null;
     }
 
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+    setIsSpeaking(false);
     setIsRecording(false);
   }, []);
 
   return {
     isRecording,
+    isSpeaking,
     permissionGranted,
     error,
     startRecording,

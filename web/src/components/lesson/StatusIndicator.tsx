@@ -6,6 +6,7 @@ import SoundWave from '@/components/animations/SoundWave';
 
 interface StatusIndicatorProps {
   status: ProcessingStatus;
+  isSpeaking?: boolean;
 }
 
 const statusConfig: Record<
@@ -44,8 +45,28 @@ const statusConfig: Record<
   },
 };
 
-export default function StatusIndicator({ status }: StatusIndicatorProps) {
-  const config = statusConfig[status];
+export default function StatusIndicator({ status, isSpeaking = false }: StatusIndicatorProps) {
+  // Override display when user is actively speaking during listening state
+  const isVoiceActive = isSpeaking && (status === 'listening' || status === 'idle');
+
+  const displayConfig = isVoiceActive
+    ? {
+        label: 'Speaking',
+        icon: '🗣️',
+        color: 'from-violet-100 to-purple-50 border-violet-300',
+        dotColor: 'bg-violet-500',
+      }
+    : statusConfig[status];
+
+  // When listening but not speaking, show "Waiting..."
+  const isWaiting = !isSpeaking && status === 'listening';
+  const config = isWaiting
+    ? {
+        ...statusConfig.listening,
+        label: 'Waiting...',
+        icon: '👂',
+      }
+    : displayConfig;
 
   return (
     <div
@@ -62,7 +83,13 @@ export default function StatusIndicator({ status }: StatusIndicatorProps) {
         <span className="text-base font-bold font-nunito text-slate-700">
           {config.label}
         </span>
-        {status === 'listening' && (
+        {isVoiceActive && (
+          <SoundWave active color={config.dotColor} bars={5} size="sm" />
+        )}
+        {isWaiting && (
+          <BouncingDots color={config.dotColor} size="sm" />
+        )}
+        {!isVoiceActive && !isWaiting && status === 'listening' && (
           <SoundWave active color={config.dotColor} bars={4} size="sm" />
         )}
         {(status === 'processing' || status === 'translating') && (
