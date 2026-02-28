@@ -5,7 +5,7 @@ ENV PYTHONUNBUFFERED=1
 
 RUN apt-get update && apt-get install -y \
     python3.11 python3.11-venv python3-pip \
-    libsndfile1 ffmpeg \
+    libsndfile1 ffmpeg espeak-ng \
     && rm -rf /var/lib/apt/lists/*
 
 RUN ln -sf /usr/bin/python3.11 /usr/bin/python

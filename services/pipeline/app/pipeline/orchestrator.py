@@ -25,11 +25,27 @@ class PipelineOrchestrator:
     def load_models(self):
         """Load all models at startup."""
         logger.info("Loading pipeline models...")
+
+        t0 = time.time()
         self.denoise.load()
+        logger.info("[LOAD] Denoise: %.1fs", time.time() - t0)
+
+        t0 = time.time()
         self.vad.load()
+        logger.info("[LOAD] VAD: %.1fs", time.time() - t0)
+
+        t0 = time.time()
         self.stt.load()
+        logger.info("[LOAD] STT (Whisper %s): %.1fs", settings.whisper_model, time.time() - t0)
+
+        t0 = time.time()
         self.translate.load()
+        logger.info("[LOAD] Translate (NLLB): %.1fs", time.time() - t0)
+
+        t0 = time.time()
         self.tts.load()
+        logger.info("[LOAD] TTS (XTTS-v2): %.1fs", time.time() - t0)
+
         logger.info("All pipeline models loaded")
 
     def _pcm_to_float(self, pcm_bytes: bytes) -> np.ndarray:
@@ -44,101 +60,140 @@ class PipelineOrchestrator:
         return audio.tobytes()
 
     def process_realtime(self, audio_bytes: bytes, session) -> dict | None:
-        """Process audio chunk in real-time mode.
-
-        Runs denoise → VAD. When speech ends, runs STT → translate → TTS.
-
-        Returns:
-            dict with results or None if no action needed
-        """
+        """Process audio chunk in real-time mode."""
+        total_start = time.time()
         audio = self._pcm_to_float(audio_bytes)
+        audio_dur = len(audio) / settings.sample_rate
 
-        # Step 1: Denoise (CPU, ~50ms)
+        # Step 1: Denoise
+        t0 = time.time()
         if session.denoise:
             audio = self.denoise.process(audio, settings.sample_rate)
+        denoise_ms = (time.time() - t0) * 1000
 
-        # Step 2: VAD (CPU, ~30ms)
+        # Step 2: VAD
+        t0 = time.time()
         vad_result = self.vad.process(audio, settings.sample_rate)
+        vad_ms = (time.time() - t0) * 1000
 
         result = {
             "speech_start": vad_result["speech_start"],
             "speech_end": vad_result["speech_end"],
         }
 
+        stt_ms = 0
+        translate_ms = 0
+        tts_ms = 0
+
         # Only run full pipeline when speech segment is complete
         if vad_result["speech_end"] and vad_result["speech_audio"]:
             speech_audio = self._pcm_to_float(vad_result["speech_audio"])
-            pipeline_result = self._run_stt_translate_tts(
-                speech_audio, session.source_lang, session.target_lang, session.voice
-            )
-            result.update(pipeline_result)
+            speech_dur = len(speech_audio) / settings.sample_rate
 
-        if not result.get("speech_start") and not result.get("speech_end") and not result.get("transcript"):
+            # Step 3: STT
+            t0 = time.time()
+            transcript = self.stt.transcribe(speech_audio, language=session.source_lang)
+            stt_ms = (time.time() - t0) * 1000
+
+            if transcript.strip():
+                result["transcript"] = transcript
+
+                # Step 4: Translate
+                t0 = time.time()
+                translation = self.translate.translate(transcript, session.source_lang, session.target_lang)
+                translate_ms = (time.time() - t0) * 1000
+                result["translation"] = translation
+
+                # Step 5: TTS
+                t0 = time.time()
+                tts_audio = self.tts.synthesize(translation, voice=session.voice, language=session.target_lang)
+                tts_ms = (time.time() - t0) * 1000
+                result["audio"] = tts_audio
+
+                total_ms = (time.time() - total_start) * 1000
+                logger.info(
+                    "═══ REALTIME PIPELINE ═══\n"
+                    "  Speech duration : %.1fs\n"
+                    "  ① Denoise       : %7.0fms\n"
+                    "  ② VAD           : %7.0fms\n"
+                    "  ③ STT (Whisper) : %7.0fms\n"
+                    "  ④ Translate     : %7.0fms\n"
+                    "  ⑤ TTS (XTTS)   : %7.0fms\n"
+                    "  ─────────────────────────\n"
+                    "  TOTAL           : %7.0fms (%.1fs)\n"
+                    "  \"%s\" → \"%s\"",
+                    speech_dur,
+                    denoise_ms, vad_ms, stt_ms, translate_ms, tts_ms,
+                    total_ms, total_ms / 1000,
+                    transcript[:60], translation[:60],
+                )
+                return result
+
+        if not result.get("speech_start") and not result.get("speech_end"):
             return None
 
         return result
 
     def process_segment(self, audio_bytes: bytes, session) -> dict:
-        """Process a complete audio segment (push-to-talk mode).
-
-        Runs denoise → STT → translate → TTS (skips VAD).
-
-        Returns:
-            dict with transcript, translation, and audio
-        """
-        audio = self._pcm_to_float(audio_bytes)
-
-        # Step 1: Denoise (CPU, ~50ms)
-        if session.denoise:
-            audio = self.denoise.process(audio, settings.sample_rate)
-
-        # Steps 2-4: STT → translate → TTS
-        return self._run_stt_translate_tts(
-            audio, session.source_lang, session.target_lang, session.voice
-        )
-
-    def _run_stt_translate_tts(
-        self, audio: np.ndarray, source_lang: str, target_lang: str, voice: str
-    ) -> dict:
-        """Run STT → translate → TTS pipeline with timing.
-
-        Args:
-            audio: float32 numpy array
-            source_lang: source language code
-            target_lang: target language code
-            voice: voice preset name
-
-        Returns:
-            dict with transcript, translation, audio keys
-        """
+        """Process a complete audio segment (push-to-talk mode)."""
         total_start = time.time()
+        audio = self._pcm_to_float(audio_bytes)
+        audio_dur = len(audio) / settings.sample_rate
+
         result = {}
 
-        # STT (GPU, ~300ms)
+        # Step 1: Denoise
         t0 = time.time()
-        transcript = self.stt.transcribe(audio, language=source_lang)
+        if session.denoise:
+            audio = self.denoise.process(audio, settings.sample_rate)
+        denoise_ms = (time.time() - t0) * 1000
+
+        # Step 2: STT
+        t0 = time.time()
+        transcript = self.stt.transcribe(audio, language=session.source_lang)
         stt_ms = (time.time() - t0) * 1000
+
         if not transcript.strip():
-            logger.info("Pipeline: STT returned empty (%.0fms)", stt_ms)
+            total_ms = (time.time() - total_start) * 1000
+            logger.info(
+                "═══ PTT PIPELINE (empty) ═══\n"
+                "  Audio duration  : %.1fs\n"
+                "  ① Denoise       : %7.0fms\n"
+                "  ② STT (Whisper) : %7.0fms → (empty)\n"
+                "  TOTAL           : %7.0fms",
+                audio_dur, denoise_ms, stt_ms, total_ms,
+            )
             return result
+
         result["transcript"] = transcript
 
-        # Translate (GPU, ~200ms)
+        # Step 3: Translate
         t0 = time.time()
-        translation = self.translate.translate(transcript, source_lang, target_lang)
+        translation = self.translate.translate(transcript, session.source_lang, session.target_lang)
         translate_ms = (time.time() - t0) * 1000
         result["translation"] = translation
 
-        # TTS (~500ms)
+        # Step 4: TTS
         t0 = time.time()
-        tts_audio = self.tts.synthesize(translation, voice=voice, language=target_lang)
+        tts_audio = self.tts.synthesize(translation, voice=session.voice, language=session.target_lang)
         tts_ms = (time.time() - t0) * 1000
         result["audio"] = tts_audio
 
         total_ms = (time.time() - total_start) * 1000
+
         logger.info(
-            "Pipeline done in %.0fms (STT: %.0fms, Translate: %.0fms, TTS: %.0fms) | \"%s\" → \"%s\"",
-            total_ms, stt_ms, translate_ms, tts_ms,
+            "═══ PTT PIPELINE ═══\n"
+            "  Audio duration  : %.1fs\n"
+            "  ① Denoise       : %7.0fms\n"
+            "  ② STT (Whisper) : %7.0fms\n"
+            "  ③ Translate     : %7.0fms\n"
+            "  ④ TTS (XTTS)   : %7.0fms\n"
+            "  ─────────────────────────\n"
+            "  TOTAL           : %7.0fms (%.1fs)\n"
+            "  \"%s\" → \"%s\"",
+            audio_dur,
+            denoise_ms, stt_ms, translate_ms, tts_ms,
+            total_ms, total_ms / 1000,
             transcript[:60], translation[:60],
         )
 

@@ -37,6 +37,8 @@ install:
 	cd services/api && go mod download
 
 install-pipeline:
+	which ffmpeg > /dev/null 2>&1 || (echo "Installing ffmpeg & espeak-ng..." && sudo apt-get update && sudo apt-get install -y ffmpeg espeak-ng)
+	which espeak-ng > /dev/null 2>&1 || (sudo apt-get update && sudo apt-get install -y espeak-ng)
 	cd services/pipeline && pip install -e .
 
 # --- Build ---
