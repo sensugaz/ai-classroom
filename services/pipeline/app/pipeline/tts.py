@@ -8,9 +8,9 @@ logger = logging.getLogger(__name__)
 # Kokoro voice mapping — natural human voices
 _KOKORO_VOICES = {
     "adult_female": "af_heart",      # warm, natural female
-    "adult_male": "am_adam",          # clear, natural male
+    "adult_male": "am_michael",       # clear, natural male
     "child_female": "af_bella",       # lighter female voice
-    "child_male": "am_michael",       # lighter male voice
+    "child_male": "am_adam",          # lighter male voice
 }
 
 # Kokoro language codes
