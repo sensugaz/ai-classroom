@@ -1,4 +1,4 @@
-"""Pipeline orchestrator - chains denoise → VAD → STT → translate → TTS."""
+"""Pipeline orchestrator - chains denoise → VAD → STT → postprocess → translate → TTS."""
 
 import logging
 import time
@@ -10,6 +10,7 @@ from .vad import VadProcessor
 from .stt import SttProcessor
 from .translate import TranslateProcessor
 from .tts import TtsProcessor
+from .postprocess import SttPostProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,7 @@ class PipelineOrchestrator:
         self.stt = SttProcessor(model_size=settings.whisper_model, device=settings.device)
         self.translate = TranslateProcessor(model_name=settings.translate_model, device=settings.device)
         self.tts = TtsProcessor(device=settings.device, voice_presets_dir=settings.voice_presets_dir)
+        self.postprocess = SttPostProcessor(device=settings.device)
 
     def load_models(self):
         """Load all models at startup."""
@@ -40,11 +42,16 @@ class PipelineOrchestrator:
 
         t0 = time.time()
         self.translate.load()
-        logger.info("[LOAD] Translate (NLLB): %.1fs", time.time() - t0)
+        logger.info("[LOAD] Translate (MarianMT): %.1fs", time.time() - t0)
 
         t0 = time.time()
         self.tts.load()
         logger.info("[LOAD] TTS: %.1fs", time.time() - t0)
+
+        if settings.stt_postprocess:
+            t0 = time.time()
+            self.postprocess.load()
+            logger.info("[LOAD] STT PostProcess (Qwen): %.1fs", time.time() - t0)
 
         logger.info("All pipeline models loaded")
 
@@ -82,6 +89,7 @@ class PipelineOrchestrator:
         }
 
         stt_ms = 0
+        postprocess_ms = 0
         translate_ms = 0
         tts_ms = 0
 
@@ -94,6 +102,12 @@ class PipelineOrchestrator:
             t0 = time.time()
             transcript = self.stt.transcribe(speech_audio, language=session.source_lang)
             stt_ms = (time.time() - t0) * 1000
+
+            # Step 3.5: PostProcess STT
+            if transcript.strip() and settings.stt_postprocess:
+                t0 = time.time()
+                transcript = self.postprocess.process(transcript, audio_duration=speech_dur)
+                postprocess_ms = (time.time() - t0) * 1000
 
             if transcript.strip():
                 result["transcript"] = transcript
@@ -117,13 +131,14 @@ class PipelineOrchestrator:
                     "  ① Denoise       : %7.0fms\n"
                     "  ② VAD           : %7.0fms\n"
                     "  ③ STT (Whisper) : %7.0fms\n"
+                    "  ③½ PostProcess  : %7.0fms\n"
                     "  ④ Translate     : %7.0fms\n"
-                    "  ⑤ TTS   : %7.0fms\n"
+                    "  ⑤ TTS           : %7.0fms\n"
                     "  ─────────────────────────\n"
                     "  TOTAL           : %7.0fms (%.1fs)\n"
                     "  \"%s\" → \"%s\"",
                     speech_dur,
-                    denoise_ms, vad_ms, stt_ms, translate_ms, tts_ms,
+                    denoise_ms, vad_ms, stt_ms, postprocess_ms, translate_ms, tts_ms,
                     total_ms, total_ms / 1000,
                     transcript[:60], translation[:60],
                 )
@@ -152,6 +167,13 @@ class PipelineOrchestrator:
         t0 = time.time()
         transcript = self.stt.transcribe(audio, language=session.source_lang)
         stt_ms = (time.time() - t0) * 1000
+
+        # Step 2.5: PostProcess STT
+        postprocess_ms = 0
+        if transcript.strip() and settings.stt_postprocess:
+            t0 = time.time()
+            transcript = self.postprocess.process(transcript, audio_duration=audio_dur)
+            postprocess_ms = (time.time() - t0) * 1000
 
         if not transcript.strip():
             total_ms = (time.time() - total_start) * 1000
@@ -186,13 +208,14 @@ class PipelineOrchestrator:
             "  Audio duration  : %.1fs\n"
             "  ① Denoise       : %7.0fms\n"
             "  ② STT (Whisper) : %7.0fms\n"
+            "  ②½ PostProcess  : %7.0fms\n"
             "  ③ Translate     : %7.0fms\n"
-            "  ④ TTS   : %7.0fms\n"
+            "  ④ TTS           : %7.0fms\n"
             "  ─────────────────────────\n"
             "  TOTAL           : %7.0fms (%.1fs)\n"
             "  \"%s\" → \"%s\"",
             audio_dur,
-            denoise_ms, stt_ms, translate_ms, tts_ms,
+            denoise_ms, stt_ms, postprocess_ms, translate_ms, tts_ms,
             total_ms, total_ms / 1000,
             transcript[:60], translation[:60],
         )
