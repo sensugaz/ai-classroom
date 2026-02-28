@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     stt_postprocess: bool = True
     denoise_enabled: bool = False
 
-    model_config = {"env_prefix": ""}
+    model_config = {"env_prefix": "", "env_file": ".env", "env_file_encoding": "utf-8"}
 
 
 settings = Settings()
