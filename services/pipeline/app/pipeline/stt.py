@@ -36,17 +36,17 @@ class SttProcessor:
         segments, info = self.model.transcribe(
             audio,
             language=language,
-            beam_size=1,
+            beam_size=3,
             vad_filter=False,
             condition_on_previous_text=False,
-            no_speech_threshold=0.5,
-            log_prob_threshold=-0.3,
+            no_speech_threshold=0.8,
+            log_prob_threshold=-1.0,
             temperature=0.0,
         )
 
         texts = []
         for seg in segments:
-            if seg.no_speech_prob > 0.4:
+            if seg.no_speech_prob > 0.7:
                 logger.info("STT: skip no-speech segment (%.2f): %s",
                             seg.no_speech_prob, seg.text.strip())
                 continue
