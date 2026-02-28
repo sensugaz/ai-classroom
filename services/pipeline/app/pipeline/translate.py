@@ -73,16 +73,22 @@ class TranslateProcessor:
         tgt_code = LANG_CODES.get(target_lang, f"{target_lang}_Latn")
 
         # Limit max output length based on input (prevent hallucination)
-        input_tokens = len(text.split())
-        self._max_length = max(input_tokens * 4, 20)  # at most 4x input words, min 20
+        # Thai/CJK have no spaces, so count characters instead of words
+        input_words = len(text.split())
+        input_chars = len(text)
+        # Use whichever gives a better estimate
+        estimated_tokens = max(input_words, input_chars // 2)
+        self._max_length = max(estimated_tokens * 3, 10)  # at most 3x, min 10
 
         if self.translator is not None:
             result = self._translate_ct2(text, src_code, tgt_code)
         else:
             result = self._translate_hf(text, src_code, tgt_code)
 
-        # Post-process: detect and truncate hallucination (repeated phrases)
+        # Post-process: detect and truncate hallucination
         result = self._remove_repetition(result)
+        # Trim to roughly match expected output length
+        result = self._trim_excess(result, estimated_tokens)
         return result
 
     @staticmethod
@@ -109,6 +115,21 @@ class TranslateProcessor:
                     logger.warning("Hallucination detected: '%s' repeated %dx, truncating",
                                    " ".join(phrase), repeats)
                     return " ".join(words[:i + n])
+        return text
+
+    @staticmethod
+    def _trim_excess(text: str, input_token_estimate: int) -> str:
+        """Trim output if it's way longer than expected (sign of hallucination)."""
+        words = text.split()
+        max_words = max(input_token_estimate * 3, 8)
+        if len(words) > max_words:
+            # Cut at last sentence boundary within limit
+            trimmed = " ".join(words[:max_words])
+            for sep in [".", "!", "?"]:
+                idx = trimmed.rfind(sep)
+                if idx > len(trimmed) // 2:
+                    return trimmed[:idx + 1]
+            return trimmed
         return text
 
     def _translate_ct2(self, text: str, src_code: str, tgt_code: str) -> str:
