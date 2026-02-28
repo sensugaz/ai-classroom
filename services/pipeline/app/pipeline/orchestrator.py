@@ -1,6 +1,7 @@
 """Pipeline orchestrator - chains denoise → VAD → STT → translate → TTS."""
 
 import logging
+import time
 import numpy as np
 
 from ..config import settings
@@ -99,7 +100,7 @@ class PipelineOrchestrator:
     def _run_stt_translate_tts(
         self, audio: np.ndarray, source_lang: str, target_lang: str, voice: str
     ) -> dict:
-        """Run STT → translate → TTS pipeline.
+        """Run STT → translate → TTS pipeline with timing.
 
         Args:
             audio: float32 numpy array
@@ -110,20 +111,35 @@ class PipelineOrchestrator:
         Returns:
             dict with transcript, translation, audio keys
         """
+        total_start = time.time()
         result = {}
 
         # STT (GPU, ~300ms)
+        t0 = time.time()
         transcript = self.stt.transcribe(audio, language=source_lang)
+        stt_ms = (time.time() - t0) * 1000
         if not transcript.strip():
+            logger.info("Pipeline: STT returned empty (%.0fms)", stt_ms)
             return result
         result["transcript"] = transcript
 
         # Translate (GPU, ~200ms)
+        t0 = time.time()
         translation = self.translate.translate(transcript, source_lang, target_lang)
+        translate_ms = (time.time() - t0) * 1000
         result["translation"] = translation
 
-        # TTS (GPU, ~300ms)
+        # TTS (~500ms)
+        t0 = time.time()
         tts_audio = self.tts.synthesize(translation, voice=voice, language=target_lang)
+        tts_ms = (time.time() - t0) * 1000
         result["audio"] = tts_audio
+
+        total_ms = (time.time() - total_start) * 1000
+        logger.info(
+            "Pipeline done in %.0fms (STT: %.0fms, Translate: %.0fms, TTS: %.0fms) | \"%s\" → \"%s\"",
+            total_ms, stt_ms, translate_ms, tts_ms,
+            transcript[:60], translation[:60],
+        )
 
         return result

@@ -59,18 +59,21 @@ class TranscriptPartial:
 class TranscriptDone:
     type: str = "transcript.done"
     text: str = ""
+    processing_time_ms: float = 0
 
 
 @dataclass
 class TranslationDone:
     type: str = "translation.done"
     text: str = ""
+    processing_time_ms: float = 0
 
 
 @dataclass
 class AudioDone:
     type: str = "audio.done"
     segment_id: str = ""
+    processing_time_ms: float = 0
 
 
 @dataclass

@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import time
 
 from fastapi import WebSocket, WebSocketDisconnect
 
@@ -105,6 +106,7 @@ class ConnectionHandler:
     async def _process_realtime(self, ws: WebSocket, session: Session, audio_data: bytes):
         """Process audio in real-time mode with VAD."""
         try:
+            t_start = time.time()
             result = await asyncio.get_event_loop().run_in_executor(
                 None,
                 self.pipeline.process_realtime,
@@ -115,6 +117,8 @@ class ConnectionHandler:
             if result is None:
                 return
 
+            elapsed_ms = (time.time() - t_start) * 1000
+
             if result.get("speech_start"):
                 await ws.send_text(serialize_message(VadSpeechStart()))
 
@@ -123,20 +127,21 @@ class ConnectionHandler:
 
             if result.get("transcript"):
                 await ws.send_text(serialize_message(
-                    TranscriptDone(text=result["transcript"])
+                    TranscriptDone(text=result["transcript"], processing_time_ms=round(elapsed_ms))
                 ))
 
             if result.get("translation"):
                 await ws.send_text(serialize_message(
-                    TranslationDone(text=result["translation"])
+                    TranslationDone(text=result["translation"], processing_time_ms=round(elapsed_ms))
                 ))
 
             if result.get("audio"):
                 segment_id = session.next_segment_id()
                 await ws.send_bytes(result["audio"])
                 await ws.send_text(serialize_message(
-                    AudioDone(segment_id=segment_id)
+                    AudioDone(segment_id=segment_id, processing_time_ms=round(elapsed_ms))
                 ))
+                logger.info("Realtime segment done in %.1fs", elapsed_ms / 1000)
 
         except Exception as e:
             logger.exception("Pipeline error: %s", e)
@@ -147,6 +152,7 @@ class ConnectionHandler:
     async def _process_audio_segment(self, ws: WebSocket, session: Session, audio_data: bytes):
         """Process a complete audio segment (push-to-talk mode)."""
         try:
+            t_start = time.time()
             result = await asyncio.get_event_loop().run_in_executor(
                 None,
                 self.pipeline.process_segment,
@@ -154,22 +160,25 @@ class ConnectionHandler:
                 session,
             )
 
+            elapsed_ms = (time.time() - t_start) * 1000
+
             if result.get("transcript"):
                 await ws.send_text(serialize_message(
-                    TranscriptDone(text=result["transcript"])
+                    TranscriptDone(text=result["transcript"], processing_time_ms=round(elapsed_ms))
                 ))
 
             if result.get("translation"):
                 await ws.send_text(serialize_message(
-                    TranslationDone(text=result["translation"])
+                    TranslationDone(text=result["translation"], processing_time_ms=round(elapsed_ms))
                 ))
 
             if result.get("audio"):
                 segment_id = session.next_segment_id()
                 await ws.send_bytes(result["audio"])
                 await ws.send_text(serialize_message(
-                    AudioDone(segment_id=segment_id)
+                    AudioDone(segment_id=segment_id, processing_time_ms=round(elapsed_ms))
                 ))
+                logger.info("PTT segment done in %.1fs", elapsed_ms / 1000)
 
         except Exception as e:
             logger.exception("Pipeline error: %s", e)
