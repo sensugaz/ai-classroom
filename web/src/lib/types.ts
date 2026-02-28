@@ -97,11 +97,14 @@ export type WSOutgoingMessage =
 export type WSIncomingMessage =
   | { type: 'session.created'; session_id: string }
   | { type: 'transcript.partial'; text: string }
-  | { type: 'transcript.final'; segment: TranscriptSegment }
+  | { type: 'transcript.final'; text: string; segment?: TranscriptSegment }
+  | { type: 'transcript.done'; text: string }
   | { type: 'translation.partial'; text: string }
-  | { type: 'translation.final'; segment: TranscriptSegment }
+  | { type: 'translation.final'; text: string; segment?: TranscriptSegment }
+  | { type: 'translation.done'; text: string }
   | { type: 'audio.start' }
   | { type: 'audio.end' }
+  | { type: 'audio.done'; segment_id: string }
   | { type: 'status.update'; status: string }
   | { type: 'error'; message: string };
 

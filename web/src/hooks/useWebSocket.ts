@@ -29,6 +29,8 @@ export function useWebSocket({
   const setPartialTranslation = useTranscriptStore((s) => s.setPartialTranslation);
   const setProcessingStatus = useLessonStore((s) => s.setProcessingStatus);
   const setError = useLessonStore((s) => s.setError);
+  const segmentCountRef = useRef(0);
+  const lastTranscriptRef = useRef('');
 
   const sendJSON = useCallback((msg: WSOutgoingMessage) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -71,7 +73,10 @@ export function useWebSocket({
             break;
 
           case 'transcript.final':
-            setPartialOriginal('');
+          case 'transcript.done':
+            setPartialOriginal(msg.text || '');
+            lastTranscriptRef.current = msg.text || '';
+            setProcessingStatus('translating');
             break;
 
           case 'translation.partial':
@@ -80,8 +85,21 @@ export function useWebSocket({
             break;
 
           case 'translation.final':
-            addSegment(msg.segment);
+          case 'translation.done':
+            addSegment({
+              index: segmentCountRef.current++,
+              original_text: lastTranscriptRef.current,
+              translated_text: msg.text || (msg as any).segment?.translated_text || '',
+              timestamp: Date.now() / 1000,
+            });
+            setPartialOriginal('');
             setPartialTranslation('');
+            lastTranscriptRef.current = '';
+            break;
+
+          case 'audio.done':
+            setProcessingStatus('speaking');
+            onAudioStart?.();
             break;
 
           case 'audio.start':
