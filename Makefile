@@ -1,4 +1,4 @@
-.PHONY: backend frontend pipeline mongo all stop clean
+.PHONY: backend frontend pipeline mongo all stop clean push
 
 # --- Individual services (local dev, no Docker) ---
 
@@ -58,6 +58,13 @@ all:
 		make backend & \
 		make frontend & \
 		wait
+
+# --- Git ---
+
+push:
+	git add -A
+	git commit -m "$(or $(m),update)"
+	git push
 
 clean:
 	docker compose down -v
