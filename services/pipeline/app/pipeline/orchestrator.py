@@ -90,7 +90,8 @@ class PipelineOrchestrator:
 
         # Only run full pipeline when speech segment is complete
         if vad_result["speech_end"] and vad_result["speech_audio"]:
-            speech_audio = self._pcm_to_float(vad_result["speech_audio"])
+            # VAD buffer stores float32 bytes directly (not PCM int16)
+            speech_audio = np.frombuffer(vad_result["speech_audio"], dtype=np.float32)
             speech_dur = len(speech_audio) / settings.sample_rate
 
             # Step 2: STT
