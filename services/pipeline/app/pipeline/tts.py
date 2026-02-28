@@ -155,34 +155,41 @@ class TtsProcessor:
             PCM 16-bit 24kHz mono audio bytes
         """
         if not text.strip():
+            logger.warning("[TTS] Empty text, skipping")
             return b""
 
         if not self._loaded:
-            logger.warning("XTTS-v2 not loaded, returning silence")
+            logger.warning("[TTS] XTTS-v2 not loaded → silence")
             return self._synthesize_silence(text)
 
         xtts_lang = XTTS_LANGUAGES.get(language)
         if not xtts_lang:
-            logger.warning("Language '%s' not supported by XTTS-v2, returning silence", language)
+            logger.warning("[TTS] Language '%s' not in XTTS-v2 supported list → silence", language)
             return self._synthesize_silence(text)
 
         ref_audio = self._find_reference_audio(voice, language)
         if not ref_audio:
-            logger.warning("No reference audio for %s/%s, returning silence", language, voice)
+            logger.warning("[TTS] No reference audio found for voice='%s' lang='%s' → silence", voice, language)
+            logger.warning("[TTS] Searched: %s", self.voice_presets_dir / language / voice)
             return self._synthesize_silence(text)
 
         try:
-            logger.info("TTS XTTS-v2 [lang=%s, voice=%s]: %s", language, voice, text[:80])
+            logger.info("[TTS] XTTS-v2 synthesizing [lang=%s, voice=%s, ref=%s]: %s",
+                        xtts_lang, voice, ref_audio, text[:80])
 
             wav = self.model.tts(text=text, speaker_wav=ref_audio, language=xtts_lang)
 
             # Convert float list to PCM 16-bit
             audio = np.array(wav, dtype=np.float32)
             audio = np.clip(audio * 32768.0, -32768, 32767).astype(np.int16)
-            return audio.tobytes()
+            pcm = audio.tobytes()
+
+            duration_s = len(audio) / self.sample_rate
+            logger.info("[TTS] Generated %.1fs audio (%d bytes)", duration_s, len(pcm))
+            return pcm
 
         except Exception as e:
-            logger.exception("XTTS-v2 synthesis failed: %s", e)
+            logger.exception("[TTS] XTTS-v2 synthesis failed: %s", e)
             return self._synthesize_silence(text)
 
     def _synthesize_silence(self, text: str) -> bytes:
