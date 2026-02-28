@@ -269,24 +269,27 @@ export default function LessonPage() {
       {/* Main transcript area */}
       <TranscriptPanel />
 
-      {/* Bottom area - Status / PTT */}
-      <div className="shrink-0 px-4 py-3 bg-white border-t border-slate-200 pb-safe">
-        {mode === 'realtime' ? (
-          <StatusIndicator status={processingStatus} isSpeaking={isSpeaking} />
-        ) : (
-          <div className="flex justify-center">
-            <PushToTalkButton
-              isPressed={ptt.isPressed}
-              onPressStart={ptt.onPressStart}
-              onPressEnd={ptt.onPressEnd}
-              disabled={status !== 'active'}
-            />
-          </div>
-        )}
-      </div>
+      {/* Unified Footer */}
+      <div className="shrink-0 bg-white border-t border-slate-200 pb-safe">
+        {/* Status / PTT row */}
+        <div className="px-4 pt-3 pb-2">
+          {mode === 'realtime' ? (
+            <StatusIndicator status={processingStatus} isSpeaking={isSpeaking} />
+          ) : (
+            <div className="flex justify-center">
+              <PushToTalkButton
+                isPressed={ptt.isPressed}
+                onPressStart={ptt.onPressStart}
+                onPressEnd={ptt.onPressEnd}
+                disabled={status !== 'active'}
+              />
+            </div>
+          )}
+        </div>
 
-      {/* Controls bar */}
-      <LessonControls onModeChange={handleModeChange} />
+        {/* Controls row */}
+        <LessonControls onModeChange={handleModeChange} />
+      </div>
     </main>
   );
 }

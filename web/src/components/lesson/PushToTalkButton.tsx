@@ -16,7 +16,7 @@ export default function PushToTalkButton({
   disabled = false,
 }: PushToTalkButtonProps) {
   return (
-    <div className="flex flex-col items-center gap-2 w-full max-w-xs">
+    <div className="flex flex-col items-center gap-1.5 w-full">
       <button
         type="button"
         disabled={disabled}
@@ -33,21 +33,26 @@ export default function PushToTalkButton({
         }}
         onTouchCancel={onPressEnd}
         className={`
-          w-full h-12 rounded-xl
-          flex items-center justify-center gap-2
+          w-full max-w-sm h-12 rounded-xl
+          flex items-center justify-center gap-2.5
           transition-all duration-150 ease-out
           touch-manipulation select-none
           focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2
-          disabled:opacity-50 disabled:cursor-not-allowed
+          disabled:opacity-40 disabled:cursor-not-allowed
           ${
             isPressed
-              ? 'bg-blue-600 text-white scale-[0.98] shadow-sm'
-              : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+              ? 'bg-blue-600 text-white scale-[0.98]'
+              : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50'
           }
         `}
       >
-        <Mic className={`w-4 h-4 ${isPressed ? 'text-white' : 'text-slate-500'}`} />
-        <span className="text-sm font-medium">
+        <span className={`relative flex items-center justify-center ${isPressed ? '' : ''}`}>
+          {isPressed && (
+            <span className="absolute inset-0 -m-1.5 rounded-full bg-white/20 animate-ping" />
+          )}
+          <Mic className="w-5 h-5 relative" />
+        </span>
+        <span className="text-sm font-semibold">
           {isPressed ? 'Release to send' : 'Hold to speak'}
         </span>
       </button>
