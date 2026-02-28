@@ -29,7 +29,7 @@ class SttProcessor:
             raise RuntimeError("STT model not loaded")
 
         duration = len(audio) / sample_rate
-        if duration < 1.0:
+        if duration < 0.3:
             logger.info("STT: audio too short (%.2fs), skipping", duration)
             return ""
 
@@ -37,7 +37,7 @@ class SttProcessor:
             audio,
             language=language,
             beam_size=1,
-            vad_filter=True,
+            vad_filter=False,
             condition_on_previous_text=False,
             no_speech_threshold=0.5,
             log_prob_threshold=-0.3,
