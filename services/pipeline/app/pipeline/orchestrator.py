@@ -86,7 +86,6 @@ class PipelineOrchestrator:
         }
 
         stt_ms = 0
-        postprocess_ms = 0
         translate_ms = 0
         tts_ms = 0
 
@@ -100,11 +99,7 @@ class PipelineOrchestrator:
             transcript = self.stt.transcribe(speech_audio, language=session.source_lang)
             stt_ms = (time.time() - t0) * 1000
 
-            # Step 3.5: PostProcess STT
-            if transcript.strip() and settings.stt_postprocess:
-                t0 = time.time()
-                transcript = self.postprocess.process(transcript, audio_duration=speech_dur)
-                postprocess_ms = (time.time() - t0) * 1000
+            # Skip post-processing in realtime mode to minimize latency
 
             if transcript.strip():
                 result["transcript"] = transcript
@@ -125,17 +120,15 @@ class PipelineOrchestrator:
                 logger.info(
                     "═══ REALTIME PIPELINE ═══\n"
                     "  Speech duration : %.1fs\n"
-                    "  ① Denoise       : %7.0fms\n"
-                    "  ② VAD           : %7.0fms\n"
-                    "  ③ STT (Whisper) : %7.0fms\n"
-                    "  ③½ PostProcess  : %7.0fms\n"
-                    "  ④ Translate     : %7.0fms\n"
-                    "  ⑤ TTS           : %7.0fms\n"
+                    "  ① VAD           : %7.0fms\n"
+                    "  ② STT (Whisper) : %7.0fms\n"
+                    "  ③ Translate     : %7.0fms\n"
+                    "  ④ TTS           : %7.0fms\n"
                     "  ─────────────────────────\n"
                     "  TOTAL           : %7.0fms (%.1fs)\n"
                     "  \"%s\" → \"%s\"",
                     speech_dur,
-                    denoise_ms, vad_ms, stt_ms, postprocess_ms, translate_ms, tts_ms,
+                    vad_ms, stt_ms, translate_ms, tts_ms,
                     total_ms, total_ms / 1000,
                     transcript[:60], translation[:60],
                 )
