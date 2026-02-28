@@ -1,10 +1,22 @@
 """faster-whisper STT - runs on GPU (~300ms)."""
 
 import logging
-import re
 import numpy as np
 
 logger = logging.getLogger(__name__)
+
+# Common Thai Whisper hallucination phrases (YouTube outros, etc.)
+_HALLUCINATION_PHRASES = {
+    "ขอบคุณที่ติดตาม",
+    "ขอบคุณที่รับชม",
+    "อย่าลืมกดไลค์",
+    "อย่าลืมกดติดตาม",
+    "กดกระดิ่ง",
+    "กดซับสไครป์",
+    "โปรดติดตามตอนต่อไป",
+    "ฝากกดไลค์",
+    "ฝากกดแชร์",
+}
 
 
 class SttProcessor:
@@ -30,7 +42,7 @@ class SttProcessor:
             raise RuntimeError("STT model not loaded")
 
         duration = len(audio) / sample_rate
-        if duration < 0.5:
+        if duration < 1.0:
             logger.info("STT: audio too short (%.2fs), skipping", duration)
             return ""
 
@@ -38,25 +50,30 @@ class SttProcessor:
             audio,
             language=language,
             beam_size=1,
-            vad_filter=False,
+            vad_filter=True,
             condition_on_previous_text=False,
-            no_speech_threshold=0.6,
-            log_prob_threshold=-0.5,
+            no_speech_threshold=0.5,
+            log_prob_threshold=-0.3,
             temperature=0.0,
         )
 
         texts = []
         for seg in segments:
-            if seg.no_speech_prob > 0.5:
+            if seg.no_speech_prob > 0.4:
                 logger.info("STT: skip no-speech segment (%.2f): %s",
                             seg.no_speech_prob, seg.text.strip())
                 continue
-            texts.append(seg.text.strip())
+            txt = seg.text.strip()
+            if txt:
+                texts.append(txt)
 
         text = " ".join(texts)
 
         # Remove repeated words/phrases (hallucination pattern)
         text = self._remove_repetition(text)
+
+        # Remove known hallucination phrases
+        text = self._remove_hallucinations(text)
 
         # Sanity check: output too long for audio duration
         max_chars_per_sec = 80
@@ -65,7 +82,8 @@ class SttProcessor:
                            duration, len(text), text[:60])
             return ""
 
-        logger.debug("STT [%s] (%.1fs): %s", language, duration, text)
+        if text:
+            logger.info("STT [%s] (%.1fs): %s", language, duration, text)
         return text
 
     @staticmethod
@@ -74,13 +92,13 @@ class SttProcessor:
         if not text:
             return text
 
-        # Thai: detect repeated phrases (e.g. "ทำไม ทำไม ทำไม" or "วันนี้จะมาเรียน วันนี้จะมาเรียน")
-        # Split on spaces (Thai whisper output often has spaces between phrases)
         words = text.split()
         if len(words) <= 2:
             return text
 
-        # Check for repeated n-grams (1-6 words)
+        # Cap to prevent O(n^3) on long hallucinations
+        words = words[:200]
+
         for n in range(1, 7):
             if len(words) < n * 3:
                 continue
@@ -95,5 +113,18 @@ class SttProcessor:
                     logger.warning("STT: repetition detected '%s' x%d, keeping first occurrence",
                                    " ".join(phrase), repeats)
                     return " ".join(words[:i + n])
+
+        return " ".join(words)
+
+    @staticmethod
+    def _remove_hallucinations(text: str) -> str:
+        """Remove known Thai Whisper hallucination phrases."""
+        original = text
+        for phrase in _HALLUCINATION_PHRASES:
+            text = text.replace(phrase, "")
+        text = " ".join(text.split())  # clean up whitespace
+
+        if text != original:
+            logger.warning("STT: removed hallucination phrases: '%s' -> '%s'", original, text)
 
         return text

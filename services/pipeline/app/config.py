@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     tts_sample_rate: int = 24000
     model_cache_dir: str = "/root/.cache"
     voice_presets_dir: str = "/app/voice_presets"
-    denoise_enabled: bool = True
+    denoise_enabled: bool = False
 
     model_config = {"env_prefix": ""}
 
