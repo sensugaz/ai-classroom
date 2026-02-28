@@ -13,7 +13,7 @@ export default function VoiceSelector({ value, onChange, targetLang }: VoiceSele
   const voices: VoiceOption[] = VOICE_OPTIONS[targetLang] || VOICE_OPTIONS['en'] || [];
 
   return (
-    <div className="grid grid-cols-2 gap-2 sm:gap-3">
+    <div className="flex flex-wrap gap-2">
       {voices.map((voice) => {
         const isSelected = value === voice.type;
         return (
@@ -22,28 +22,16 @@ export default function VoiceSelector({ value, onChange, targetLang }: VoiceSele
             type="button"
             onClick={() => onChange(voice.type as VoiceType)}
             className={`
-              relative flex flex-col items-center gap-1.5
-              py-4 px-3 rounded-xl
-              transition-all duration-200 ease-out
-              touch-manipulation select-none
+              inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg
+              text-sm font-medium transition-colors duration-150
+              focus:outline-none focus:ring-2 focus:ring-blue-600/20
               ${isSelected
-                ? 'bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-md shadow-violet-200 scale-[1.02]'
-                : 'bg-slate-50 border border-slate-200 text-slate-600 hover:border-violet-300 active:scale-[0.98]'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900'
               }
             `}
           >
-            <span className="text-2xl sm:text-3xl">{voice.icon}</span>
-            <span className="font-bold font-nunito text-sm">{voice.label}</span>
-            <span className={`text-[11px] ${isSelected ? 'text-violet-200' : 'text-slate-400'}`}>
-              {voice.description}
-            </span>
-            {isSelected && (
-              <span className="absolute top-2 right-2 w-5 h-5 bg-white rounded-full flex items-center justify-center">
-                <svg className="w-3 h-3 text-violet-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </span>
-            )}
+            <span>{voice.label}</span>
           </button>
         );
       })}

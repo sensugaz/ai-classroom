@@ -12,6 +12,7 @@ import TranscriptPanel from '@/components/lesson/TranscriptPanel';
 import PushToTalkButton from '@/components/lesson/PushToTalkButton';
 import StatusIndicator from '@/components/lesson/StatusIndicator';
 import LessonControls from '@/components/lesson/LessonControls';
+import { BookOpen, Settings, X, AlertCircle } from 'lucide-react';
 
 export default function LessonPage() {
   const params = useParams();
@@ -53,7 +54,7 @@ export default function LessonPage() {
   });
 
   // Audio recorder (for real-time mode)
-  // During TTS playback: detect loud speech (barge-in) → stop TTS and resume sending
+  // During TTS playback: detect loud speech (barge-in) -> stop TTS and resume sending
   // During silence: send audio normally
   const BARGE_IN_THRESHOLD = 0.08; // RMS threshold to detect real speech over echo
 
@@ -62,7 +63,7 @@ export default function LessonPage() {
       if (status !== 'active' || mode !== 'realtime') return;
 
       if (isPlayingRef.current) {
-        // Check audio energy — if user is speaking, stop TTS (barge-in)
+        // Check audio energy -- if user is speaking, stop TTS (barge-in)
         const int16 = new Int16Array(data);
         let sumSq = 0;
         for (let i = 0; i < int16.length; i++) {
@@ -72,7 +73,7 @@ export default function LessonPage() {
         const rms = Math.sqrt(sumSq / int16.length);
 
         if (rms > BARGE_IN_THRESHOLD) {
-          // User is speaking — interrupt TTS
+          // User is speaking -- interrupt TTS
           clearQueue();
           sendAudio(data);
         }
@@ -194,29 +195,15 @@ export default function LessonPage() {
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
-  // Status badge color
-  const statusBadge = () => {
-    switch (status) {
-      case 'active':
-        return 'bg-emerald-100 text-emerald-700';
-      case 'paused':
-        return 'bg-amber-100 text-amber-700';
-      case 'completed':
-        return 'bg-slate-100 text-slate-700';
-      default:
-        return 'bg-indigo-100 text-indigo-700';
-    }
-  };
-
   if (error && !initialized) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-6">
+      <main className="h-screen flex items-center justify-center bg-slate-50 p-6">
         <div className="text-center space-y-4">
-          <span className="text-5xl block">😕</span>
-          <p className="text-lg text-pink-500 font-bold font-nunito">{error}</p>
+          <AlertCircle className="w-10 h-10 text-red-500 mx-auto" />
+          <p className="text-base text-red-600 font-medium">{error}</p>
           <button
             onClick={() => router.push('/setup')}
-            className="text-indigo-500 underline font-nunito"
+            className="text-sm text-blue-600 hover:text-blue-700 underline underline-offset-2"
           >
             Back to Setup
           </button>
@@ -226,48 +213,56 @@ export default function LessonPage() {
   }
 
   return (
-    <main className="h-screen h-[100dvh] flex flex-col bg-gradient-to-b from-slate-50 to-indigo-50/30">
+    <main className="h-screen h-[100dvh] flex flex-col bg-slate-50">
       {/* Top Bar */}
-      <header className="shrink-0 bg-white/90 backdrop-blur-md border-b border-slate-200 px-3 sm:px-4 py-2 sm:py-3">
-        <div className="flex items-center justify-between gap-2 sm:gap-4">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="text-xl sm:text-2xl">🎓</span>
-            <h1 className="text-sm sm:text-lg font-extrabold font-nunito text-slate-800 truncate">
+      <header className="shrink-0 bg-white border-b border-slate-200 px-4 py-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <BookOpen className="w-5 h-5 text-blue-600 shrink-0" />
+            <h1 className="text-sm font-semibold text-slate-800 truncate">
               {className || 'Lesson'}
             </h1>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
             {/* Timer */}
-            <div className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 bg-slate-100 rounded-lg sm:rounded-xl">
-              <span className="text-xs sm:text-sm font-bold font-nunito text-slate-700 tabular-nums">
-                {formatElapsed(elapsedTime)}
-              </span>
-            </div>
+            <span className="text-sm font-medium text-slate-600 tabular-nums">
+              {formatElapsed(elapsedTime)}
+            </span>
 
             {/* Connection Indicator */}
             <span
-              className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${
-                isConnected ? 'bg-emerald-400' : 'bg-slate-300'
+              className={`w-2 h-2 rounded-full shrink-0 ${
+                isConnected ? 'bg-emerald-500' : 'bg-slate-300'
               }`}
               title={isConnected ? 'Connected' : 'Disconnected'}
             />
+
+            {/* Settings */}
+            <button
+              type="button"
+              className="p-1 text-slate-400 hover:text-slate-600 transition-colors"
+              title="Settings"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </header>
 
       {/* Error Banner */}
       {error && (
-        <div className="shrink-0 px-4 py-2 bg-pink-50 border-b border-pink-200">
-          <p className="text-sm text-pink-600 font-nunito text-center">
-            {error}
-            <button
-              onClick={() => setError(null)}
-              className="ml-2 underline"
-            >
-              Dismiss
-            </button>
-          </p>
+        <div className="shrink-0 px-4 py-2 bg-red-50 border-b border-red-200 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+            <p className="text-sm text-red-600 truncate">{error}</p>
+          </div>
+          <button
+            onClick={() => setError(null)}
+            className="p-0.5 text-red-400 hover:text-red-600 transition-colors shrink-0"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 
@@ -275,7 +270,7 @@ export default function LessonPage() {
       <TranscriptPanel />
 
       {/* Bottom area - Status / PTT */}
-      <div className="shrink-0 px-3 sm:px-4 py-3 sm:py-4 bg-white/60 backdrop-blur-sm border-t border-slate-200 pb-safe">
+      <div className="shrink-0 px-4 py-3 bg-white border-t border-slate-200 pb-safe">
         {mode === 'realtime' ? (
           <StatusIndicator status={processingStatus} isSpeaking={isSpeaking} />
         ) : (

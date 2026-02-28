@@ -1,9 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import BouncingDots from '@/components/animations/BouncingDots';
+import { ChevronLeft, ChevronRight, Loader2, AlertCircle, Layers } from 'lucide-react';
 import { getFlashcards } from '@/lib/api';
 import type { Flashcard } from '@/lib/types';
 
@@ -77,29 +75,29 @@ export default function FlashcardsTab({ sessionId }: FlashcardsTabProps) {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 gap-4">
-        <BouncingDots color="bg-violet-400" size="lg" />
-        <p className="text-slate-500 font-nunito">Loading flashcards...</p>
+      <div className="flex items-center justify-center py-16 gap-3">
+        <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
+        <p className="text-sm text-slate-500">Loading flashcards...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <Card variant="outlined" padding="lg">
-        <div className="text-center">
-          <span className="text-4xl block mb-3">😕</span>
-          <p className="text-pink-500 font-nunito font-bold">{error}</p>
+      <div className="border border-slate-200 rounded-lg p-6 bg-white">
+        <div className="flex items-center justify-center gap-2">
+          <AlertCircle className="w-5 h-5 text-red-500" />
+          <p className="text-sm text-red-600 font-medium">{error}</p>
         </div>
-      </Card>
+      </div>
     );
   }
 
   if (cards.length === 0) {
     return (
-      <div className="text-center py-16">
-        <span className="text-5xl block mb-4">🃏</span>
-        <p className="text-slate-500 font-nunito text-lg">
+      <div className="flex flex-col items-center justify-center py-16 gap-3">
+        <Layers className="w-8 h-8 text-slate-300" />
+        <p className="text-sm text-slate-500">
           No flashcards available for this lesson.
         </p>
       </div>
@@ -107,30 +105,26 @@ export default function FlashcardsTab({ sessionId }: FlashcardsTabProps) {
   }
 
   const card = cards[currentIndex];
+  const progress = ((currentIndex + 1) / cards.length) * 100;
 
   return (
-    <div className="flex flex-col items-center gap-6 animate-slide-up">
-      {/* Progress */}
-      <div className="flex items-center gap-2 text-sm font-nunito text-slate-500">
-        <span>🃏</span>
-        <span>
-          {currentIndex + 1} / {cards.length}
-        </span>
-      </div>
+    <div className="flex flex-col items-center gap-6">
+      {/* Progress text */}
+      <p className="text-sm text-slate-500">
+        {currentIndex + 1} of {cards.length}
+      </p>
 
       {/* Progress bar */}
-      <div className="w-full max-w-md h-2 bg-slate-200 rounded-full overflow-hidden">
+      <div className="w-full max-w-md h-1 bg-slate-200 rounded-lg overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-violet-400 to-pink-400 rounded-full transition-all duration-300"
-          style={{
-            width: `${((currentIndex + 1) / cards.length) * 100}%`,
-          }}
+          className="h-full bg-blue-600 rounded-lg transition-all duration-300"
+          style={{ width: `${progress}%` }}
         />
       </div>
 
       {/* Card */}
       <div
-        className="w-full max-w-md perspective-1000"
+        className="w-full max-w-md"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
@@ -149,41 +143,41 @@ export default function FlashcardsTab({ sessionId }: FlashcardsTabProps) {
           >
             {/* Front */}
             <div
-              className="w-full min-h-[280px] p-8 bg-gradient-to-br from-indigo-500 to-violet-500 rounded-3xl shadow-2xl shadow-indigo-200 flex flex-col items-center justify-center gap-4"
+              className="w-full min-h-[280px] p-8 bg-white border border-slate-200 rounded-lg flex flex-col items-center justify-center gap-3"
               style={{ backfaceVisibility: 'hidden' }}
             >
-              <p className="text-3xl font-bold font-prompt text-white text-center">
+              <p className="text-2xl font-semibold text-slate-900 text-center">
                 {card.front}
               </p>
               {card.phonetic && (
-                <p className="text-lg text-indigo-200 font-nunito italic">
+                <p className="text-sm text-slate-400 italic">
                   /{card.phonetic}/
                 </p>
               )}
-              <p className="text-sm text-indigo-200 font-nunito mt-4">
+              <p className="text-xs text-slate-400 mt-4">
                 Tap to flip
               </p>
             </div>
 
             {/* Back */}
             <div
-              className="absolute inset-0 w-full min-h-[280px] p-8 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-3xl shadow-2xl shadow-emerald-200 flex flex-col items-center justify-center gap-4"
+              className="absolute inset-0 w-full min-h-[280px] p-8 bg-slate-50 border border-slate-200 rounded-lg flex flex-col items-center justify-center gap-3"
               style={{
                 backfaceVisibility: 'hidden',
                 transform: 'rotateY(180deg)',
               }}
             >
-              <p className="text-3xl font-bold font-nunito text-white text-center">
+              <p className="text-2xl font-semibold text-slate-900 text-center">
                 {card.back}
               </p>
               {card.example && (
-                <div className="mt-4 p-4 bg-white/20 rounded-2xl w-full">
-                  <p className="text-sm text-emerald-100 font-nunito text-center">
+                <div className="mt-4 px-4 py-3 bg-white border border-slate-200 rounded-lg w-full">
+                  <p className="text-sm text-slate-500 text-center">
                     {card.example}
                   </p>
                 </div>
               )}
-              <p className="text-sm text-emerald-200 font-nunito mt-2">
+              <p className="text-xs text-slate-400 mt-2">
                 Tap to flip back
               </p>
             </div>
@@ -193,22 +187,22 @@ export default function FlashcardsTab({ sessionId }: FlashcardsTabProps) {
 
       {/* Navigation */}
       <div className="flex items-center gap-4">
-        <Button
-          variant="secondary"
-          size="lg"
+        <button
           onClick={goPrev}
           disabled={currentIndex === 0}
+          className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:text-slate-300 disabled:cursor-not-allowed transition-colors"
         >
-          ← Previous
-        </Button>
-        <Button
-          variant="primary"
-          size="lg"
+          <ChevronLeft className="w-4 h-4" />
+          Previous
+        </button>
+        <button
           onClick={goNext}
           disabled={currentIndex === cards.length - 1}
+          className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:text-slate-300 disabled:cursor-not-allowed transition-colors"
         >
-          Next →
-        </Button>
+          Next
+          <ChevronRight className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );

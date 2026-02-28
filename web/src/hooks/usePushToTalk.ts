@@ -7,9 +7,10 @@ import type { WSOutgoingMessage } from '@/lib/types';
 interface UsePushToTalkOptions {
   sendAudio: (data: ArrayBuffer) => void;
   sendJSON: (msg: WSOutgoingMessage) => void;
+  deviceId?: string;
 }
 
-export function usePushToTalk({ sendAudio, sendJSON }: UsePushToTalkOptions) {
+export function usePushToTalk({ sendAudio, sendJSON, deviceId }: UsePushToTalkOptions) {
   const [isPressed, setIsPressed] = useState(false);
   const isPressedRef = useRef(false);
 
@@ -19,6 +20,7 @@ export function usePushToTalk({ sendAudio, sendJSON }: UsePushToTalkOptions) {
         sendAudio(data);
       }
     },
+    deviceId,
   });
 
   const onPressStart = useCallback(async () => {

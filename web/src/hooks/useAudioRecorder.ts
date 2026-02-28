@@ -6,6 +6,7 @@ import { AUDIO_SAMPLE_RATE_INPUT } from '@/lib/constants';
 interface UseAudioRecorderOptions {
   onAudioData?: (data: ArrayBuffer) => void;
   sampleRate?: number;
+  deviceId?: string;
 }
 
 const SPEAKING_THRESHOLD = 0.02; // RMS threshold to detect speech
@@ -14,6 +15,7 @@ const SILENCE_DELAY = 500; // ms of silence before "stopped speaking"
 export function useAudioRecorder({
   onAudioData,
   sampleRate = AUDIO_SAMPLE_RATE_INPUT,
+  deviceId,
 }: UseAudioRecorderOptions = {}) {
   const [isRecording, setIsRecording] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -32,6 +34,7 @@ export function useAudioRecorder({
 
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
+          deviceId: deviceId ? { exact: deviceId } : undefined,
           channelCount: 1,
           sampleRate,
           echoCancellation: true,
@@ -99,7 +102,7 @@ export function useAudioRecorder({
       setError(message);
       console.error('Audio recording error:', err);
     }
-  }, [sampleRate, onAudioData]);
+  }, [sampleRate, onAudioData, deviceId]);
 
   const stopRecording = useCallback(() => {
     if (processorRef.current) {

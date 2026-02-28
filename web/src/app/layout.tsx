@@ -21,7 +21,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#6366f1',
+  themeColor: '#ffffff',
 };
 
 export default function RootLayout({
@@ -32,15 +32,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Google Fonts preconnect */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-
-        {/* Apple PWA meta tags */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta
           name="apple-mobile-web-app-status-bar-style"
@@ -49,7 +46,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Translator" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
-      <body className="font-nunito antialiased text-slate-800 safe-area-inset">
+      <body className="antialiased safe-area-inset">
         <ServiceWorkerRegistrar />
         {children}
       </body>

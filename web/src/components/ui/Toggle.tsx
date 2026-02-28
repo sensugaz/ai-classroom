@@ -17,12 +17,6 @@ export default function Toggle({
   disabled = false,
   size = 'md',
 }: ToggleProps) {
-  const trackSize = size === 'lg' ? 'w-16 h-9' : 'w-12 h-7';
-  const thumbSize = size === 'lg' ? 'w-7 h-7' : 'w-5 h-5';
-  const thumbTranslate = size === 'lg'
-    ? (checked ? 'translate-x-7' : 'translate-x-1')
-    : (checked ? 'translate-x-5' : 'translate-x-1');
-
   return (
     <label
       className={`
@@ -32,7 +26,7 @@ export default function Toggle({
     >
       <div className="flex-1">
         {label && (
-          <span className="block text-base font-bold font-nunito text-slate-700">
+          <span className="block text-sm font-medium text-slate-700">
             {label}
           </span>
         )}
@@ -50,20 +44,17 @@ export default function Toggle({
         onClick={() => !disabled && onChange(!checked)}
         className={`
           relative inline-flex items-center shrink-0
-          ${trackSize} rounded-full
-          transition-colors duration-300 ease-in-out
-          focus:outline-none focus:ring-4 focus:ring-indigo-100
-          ${checked
-            ? 'bg-gradient-to-r from-indigo-500 to-violet-500'
-            : 'bg-slate-300'
-          }
+          w-10 h-6 rounded-full
+          transition-colors duration-200
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2
+          ${checked ? 'bg-blue-600' : 'bg-slate-200'}
         `}
       >
         <span
           className={`
-            ${thumbSize} rounded-full bg-white shadow-md
-            transition-transform duration-300 ease-in-out
-            ${thumbTranslate}
+            w-4 h-4 rounded-full bg-white shadow-sm
+            transition-transform duration-200
+            ${checked ? 'translate-x-5' : 'translate-x-1'}
           `}
         />
       </button>

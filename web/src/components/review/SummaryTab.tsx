@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Card from '@/components/ui/Card';
-import BouncingDots from '@/components/animations/BouncingDots';
+import { Clock, MessageSquare, Loader2, AlertCircle } from 'lucide-react';
 import { generateSummary, getSummary } from '@/lib/api';
 import type { LessonSummary } from '@/lib/types';
 
@@ -53,92 +52,89 @@ export default function SummaryTab({ sessionId }: SummaryTabProps) {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 gap-4">
-        <BouncingDots color="bg-indigo-400" size="lg" />
-        <p className="text-slate-500 font-nunito">Generating summary...</p>
+      <div className="flex items-center justify-center py-16 gap-3">
+        <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
+        <p className="text-sm text-slate-500">Generating summary...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <Card variant="outlined" padding="lg">
-        <div className="text-center">
-          <span className="text-4xl block mb-3">😕</span>
-          <p className="text-pink-500 font-nunito font-bold">{error}</p>
+      <div className="border border-slate-200 rounded-lg p-6 bg-white">
+        <div className="flex items-center justify-center gap-2">
+          <AlertCircle className="w-5 h-5 text-red-500" />
+          <p className="text-sm text-red-600 font-medium">{error}</p>
         </div>
-      </Card>
+      </div>
     );
   }
 
   if (!summary) return null;
 
   return (
-    <div className="space-y-6 animate-slide-up">
+    <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4">
-        <Card variant="gradient" accent="indigo" padding="md">
-          <p className="text-sm text-slate-500 font-nunito">Duration</p>
-          <p className="text-2xl font-bold text-indigo-600 font-nunito">
+        <div className="border border-slate-200 rounded-lg bg-white p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <Clock className="w-4 h-4 text-slate-400" />
+            <p className="text-sm text-slate-500">Duration</p>
+          </div>
+          <p className="text-2xl font-semibold text-slate-900">
             {summary.duration_minutes} min
           </p>
-        </Card>
-        <Card variant="gradient" accent="emerald" padding="md">
-          <p className="text-sm text-slate-500 font-nunito">Segments</p>
-          <p className="text-2xl font-bold text-emerald-600 font-nunito">
+        </div>
+        <div className="border border-slate-200 rounded-lg bg-white p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <MessageSquare className="w-4 h-4 text-slate-400" />
+            <p className="text-sm text-slate-500">Segments</p>
+          </div>
+          <p className="text-2xl font-semibold text-slate-900">
             {summary.segment_count}
           </p>
-        </Card>
+        </div>
       </div>
 
       {/* Key Points */}
       {summary.key_points.length > 0 && (
-        <Card variant="elevated" accent="amber">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xl">⭐</span>
-            <h3 className="text-lg font-bold font-nunito text-slate-800">
-              Key Points
-            </h3>
-          </div>
+        <div>
+          <h3 className="text-sm font-medium text-slate-900 mb-3">
+            Key Points
+          </h3>
           <ul className="space-y-2">
             {summary.key_points.map((point, i) => (
               <li
                 key={i}
-                className="flex items-start gap-2 text-slate-700 font-nunito"
+                className="flex items-start gap-2.5 text-sm text-slate-600"
               >
-                <span className="text-amber-400 mt-0.5">●</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-1.5 shrink-0" />
                 <span>{point}</span>
               </li>
             ))}
           </ul>
-        </Card>
+        </div>
       )}
 
       {/* Bilingual summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card variant="gradient" accent="indigo">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-lg">🇹🇭</span>
-            <h3 className="text-base font-bold font-nunito text-slate-700">
-              Original
-            </h3>
-          </div>
-          <p className="text-slate-700 font-prompt leading-relaxed whitespace-pre-line">
+        <div className="border border-slate-200 rounded-lg bg-white p-4">
+          <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-3">
+            Original
+          </h3>
+          <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
             {summary.original}
           </p>
-        </Card>
+        </div>
 
-        <Card variant="gradient" accent="emerald">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-lg">🇬🇧</span>
-            <h3 className="text-base font-bold font-nunito text-slate-700">
-              Translation
-            </h3>
-          </div>
-          <p className="text-slate-700 font-nunito leading-relaxed whitespace-pre-line">
+        <div className="border border-slate-200 rounded-lg bg-white p-4">
+          <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-3">
+            Translation
+          </h3>
+          <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
             {summary.translated}
           </p>
-        </Card>
+        </div>
       </div>
     </div>
   );

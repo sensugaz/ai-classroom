@@ -1,9 +1,10 @@
 'use client';
 
 import { forwardRef, type ButtonHTMLAttributes } from 'react';
+import { Loader2 } from 'lucide-react';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
-type Size = 'sm' | 'md' | 'lg' | 'xl';
+type Size = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
@@ -13,21 +14,17 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<Variant, string> = {
-  primary:
-    'bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white shadow-lg shadow-indigo-200 active:shadow-md active:scale-[0.98]',
+  primary: 'bg-blue-600 hover:bg-blue-700 text-white',
   secondary:
-    'bg-white border-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 shadow-md shadow-indigo-50 active:scale-[0.98]',
-  ghost:
-    'bg-transparent text-slate-600 hover:bg-slate-100 active:bg-slate-200',
-  danger:
-    'bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg shadow-pink-200 active:scale-[0.98]',
+    'bg-white border border-slate-200 hover:bg-slate-50 text-slate-700',
+  ghost: 'bg-transparent hover:bg-slate-100 text-slate-600',
+  danger: 'bg-red-600 hover:bg-red-700 text-white',
 };
 
 const sizeClasses: Record<Size, string> = {
-  sm: 'px-4 py-2 text-sm rounded-xl',
-  md: 'px-6 py-3 text-base rounded-2xl',
-  lg: 'px-8 py-4 text-lg rounded-2xl',
-  xl: 'px-10 py-5 text-xl rounded-3xl',
+  sm: 'h-8 px-3 text-sm',
+  md: 'h-10 px-4 text-sm',
+  lg: 'h-12 px-6 text-base',
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -50,10 +47,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || loading}
         className={`
           inline-flex items-center justify-center gap-2
-          font-nunito font-bold
-          transition-all duration-200 ease-out
-          select-none touch-manipulation
-          disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100
+          font-medium rounded-lg
+          transition-colors
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2
+          disabled:opacity-50 disabled:cursor-not-allowed
           ${variantClasses[variant]}
           ${sizeClasses[size]}
           ${fullWidth ? 'w-full' : ''}
@@ -61,28 +58,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         `}
         {...props}
       >
-        {loading && (
-          <svg
-            className="animate-spin -ml-1 h-5 w-5"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            />
-          </svg>
-        )}
+        {loading && <Loader2 className="h-4 w-4 animate-spin" />}
         {children}
       </button>
     );

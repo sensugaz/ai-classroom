@@ -1,8 +1,6 @@
 'use client';
 
 import type { ProcessingStatus } from '@/lib/types';
-import BouncingDots from '@/components/animations/BouncingDots';
-import SoundWave from '@/components/animations/SoundWave';
 
 interface StatusIndicatorProps {
   status: ProcessingStatus;
@@ -15,87 +13,55 @@ export default function StatusIndicator({ status, isSpeaking = false }: StatusIn
   const isTtsSpeaking = status === 'speaking';
   const isWorking = status === 'processing' || status === 'translating';
 
+  // Determine dot color and label
+  let dotColor = 'bg-slate-400';
+  let label = 'Ready';
+
+  if (isVoiceActive) {
+    dotColor = 'bg-violet-600';
+    label = 'Speaking...';
+  } else if (isWaiting) {
+    dotColor = 'bg-blue-600';
+    label = 'Listening...';
+  } else if (isWorking) {
+    dotColor = 'bg-amber-500';
+    label = status === 'processing' ? 'Processing...' : 'Translating...';
+  } else if (isTtsSpeaking) {
+    dotColor = 'bg-emerald-600';
+    label = 'Playing...';
+  }
+
   return (
-    <div className="flex flex-col items-center gap-3">
-      {/* Main animated circle */}
-      <div className="relative flex items-center justify-center">
-        {/* Pulse rings when speaking */}
-        {isVoiceActive && (
-          <>
-            <span className="absolute w-20 h-20 rounded-full bg-violet-400/30 animate-ring-expand" />
-            <span
-              className="absolute w-20 h-20 rounded-full bg-violet-400/20 animate-ring-expand"
-              style={{ animationDelay: '0.5s' }}
-            />
-          </>
-        )}
+    <div className="flex items-center justify-center gap-2 h-6">
+      {/* State dot */}
+      <span
+        className={`w-2 h-2 rounded-full shrink-0 ${dotColor} ${
+          isVoiceActive || isTtsSpeaking ? 'animate-pulse' : ''
+        }`}
+      />
 
-        {/* TTS pulse rings */}
-        {isTtsSpeaking && (
-          <>
-            <span className="absolute w-20 h-20 rounded-full bg-pink-400/30 animate-ring-expand" />
-            <span
-              className="absolute w-20 h-20 rounded-full bg-pink-400/20 animate-ring-expand"
-              style={{ animationDelay: '0.5s' }}
-            />
-          </>
-        )}
+      {/* Label */}
+      <span className="text-sm font-medium text-slate-600">
+        {label}
+      </span>
 
-        {/* Center circle */}
-        <div
-          className={`
-            relative w-20 h-20 rounded-full flex items-center justify-center
-            transition-all duration-300 shadow-lg
-            ${isVoiceActive
-              ? 'bg-gradient-to-br from-violet-500 to-purple-600 animate-mic-pulse shadow-violet-300'
-              : isTtsSpeaking
-                ? 'bg-gradient-to-br from-pink-500 to-rose-600 animate-mic-pulse shadow-pink-300'
-                : isWorking
-                  ? 'bg-gradient-to-br from-amber-400 to-orange-500 shadow-amber-200'
-                  : isWaiting
-                    ? 'bg-gradient-to-br from-indigo-400 to-violet-500 shadow-indigo-200'
-                    : 'bg-gradient-to-br from-slate-300 to-slate-400 shadow-slate-200'
-            }
-          `}
-        >
-          <span className="text-3xl">
-            {isVoiceActive ? '🗣️' : isTtsSpeaking ? '🔊' : isWorking ? '🧠' : isWaiting ? '🎤' : '⏸️'}
-          </span>
+      {/* Sound wave bars for speaking/playing states */}
+      {(isVoiceActive || isTtsSpeaking) && (
+        <div className="flex items-center gap-0.5 h-4">
+          {[0, 1, 2].map((i) => (
+            <span
+              key={i}
+              className={`w-0.5 rounded-full animate-sound-wave ${
+                isVoiceActive ? 'bg-violet-600' : 'bg-emerald-600'
+              }`}
+              style={{
+                height: '100%',
+                animationDelay: `${i * 0.15}s`,
+              }}
+            />
+          ))}
         </div>
-      </div>
-
-      {/* Label + animation */}
-      <div className="flex items-center gap-2 h-6">
-        {isVoiceActive && (
-          <>
-            <span className="text-sm font-bold font-nunito text-violet-600">Speaking</span>
-            <SoundWave active color="bg-violet-500" bars={5} size="sm" />
-          </>
-        )}
-        {isWaiting && (
-          <>
-            <span className="text-sm font-bold font-nunito text-indigo-500">Listening</span>
-            <BouncingDots color="bg-indigo-400" size="sm" />
-          </>
-        )}
-        {isWorking && (
-          <>
-            <span className="text-sm font-bold font-nunito text-amber-600">
-              {status === 'processing' ? 'Processing' : 'Translating'}
-            </span>
-            <BouncingDots color="bg-amber-400" size="sm" />
-          </>
-        )}
-        {isTtsSpeaking && (
-          <>
-            <span className="text-sm font-bold font-nunito text-pink-600">Playing</span>
-            <SoundWave active color="bg-pink-500" bars={5} size="sm" />
-          </>
-        )}
-        {!isVoiceActive && !isWaiting && !isWorking && !isTtsSpeaking && (
-          <span className="text-sm font-bold font-nunito text-slate-400">Ready</span>
-        )}
-      </div>
+      )}
     </div>
   );
 }
