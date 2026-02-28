@@ -33,6 +33,8 @@ const config: Config = {
         'bounce-slow': 'bounce 1.5s infinite',
         'pulse-ring': 'pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite',
         'sound-wave': 'sound-wave 1.2s ease-in-out infinite',
+        'mic-pulse': 'mic-pulse 1.5s ease-in-out infinite',
+        'ring-expand': 'ring-expand 1.5s ease-out infinite',
         'fade-in': 'fade-in 0.3s ease-out',
         'slide-up': 'slide-up 0.4s ease-out',
         'flip': 'flip 0.6s ease-in-out',
@@ -45,6 +47,14 @@ const config: Config = {
         'sound-wave': {
           '0%, 100%': { transform: 'scaleY(0.3)' },
           '50%': { transform: 'scaleY(1)' },
+        },
+        'mic-pulse': {
+          '0%, 100%': { transform: 'scale(1)', opacity: '1' },
+          '50%': { transform: 'scale(1.1)', opacity: '0.8' },
+        },
+        'ring-expand': {
+          '0%': { transform: 'scale(1)', opacity: '0.6' },
+          '100%': { transform: 'scale(1.8)', opacity: '0' },
         },
         'fade-in': {
           '0%': { opacity: '0', transform: 'translateY(8px)' },
