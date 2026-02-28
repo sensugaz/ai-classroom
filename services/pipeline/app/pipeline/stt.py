@@ -44,24 +44,25 @@ class SttProcessor:
             logger.info("STT: audio too short (%.2fs), skipping", duration)
             return ""
 
+        # Thai initial prompt helps guide the model
+        initial_prompt = "สวัสดีครับ" if language == "th" else None
+
         segments, info = self.model.transcribe(
             audio,
             language=language,
-            beam_size=5,
+            beam_size=1,  # greedy — faster and more stable for fine-tuned models
             vad_filter=False,  # We handle VAD externally
             condition_on_previous_text=False,  # Prevent hallucination chains
-            no_speech_threshold=0.6,  # Filter low-confidence segments
-            log_prob_threshold=-1.0,  # Filter unlikely transcriptions
-            repetition_penalty=1.2,  # Penalize repeated tokens
-            word_timestamps=True,  # Helps with Thai word boundaries
+            no_speech_threshold=0.6,
+            log_prob_threshold=-0.5,
+            initial_prompt=initial_prompt,
+            temperature=0.0,  # deterministic output
         )
 
-        # Filter segments by confidence
         texts = []
         for seg in segments:
-            # Skip segments with very low probability (likely hallucination)
             if seg.no_speech_prob > 0.5:
-                logger.info("STT: skipping low-confidence segment (no_speech=%.2f): %s",
+                logger.info("STT: skip no-speech segment (%.2f): %s",
                             seg.no_speech_prob, seg.text.strip())
                 continue
             texts.append(seg.text.strip())
