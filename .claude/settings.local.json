@@ -29,7 +29,29 @@
       "Bash(git add services/pipeline/app/pipeline/tts.py services/pipeline/scripts/generate_references.py && git diff --cached --stat)",
       "Bash(grep -r \"SessionCreate\" /root/project/services/api --include=\"*.go\" 2>/dev/null | head -20)",
       "Bash(pip install kokoro soundfile 2>&1 | tail -20)",
-      "Bash(which python3 && python3 -m pip install kokoro soundfile 2>&1 | tail -30)"
+      "Bash(which python3 && python3 -m pip install kokoro soundfile 2>&1 | tail -30)",
+      "Bash(git add services/pipeline/app/pipeline/orchestrator.py services/pipeline/app/config.py services/pipeline/pyproject.toml services/pipeline/app/pipeline/postprocess.py)",
+      "Bash(git commit -m \"$\\(cat <<'EOF'\nIntegrate local Qwen2.5-0.5B STT post-processor into pipeline\n\n- Fix orchestrator constructor: use device instead of openai api_key\n- Add postprocess.process\\(\\) calls after STT in both realtime and PTT flows\n- Conditionally load postprocessor based on stt_postprocess setting\n- Remove openai_api_key from config, remove openai dependency\n- Update log labels: NLLB → MarianMT, add PostProcess timing\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "WebFetch(domain:developers.openai.com)",
+      "WebFetch(domain:artificialanalysis.ai)",
+      "WebFetch(domain:soniox.com)",
+      "WebFetch(domain:deepgram.com)",
+      "Bash(pip show kokoro 2>/dev/null)",
+      "Bash(pip3 show kokoro 2>/dev/null || python3 -m pip show kokoro 2>/dev/null || echo \"pip/kokoro not found via pip3 or python3 -m pip\")",
+      "Bash(cd /root/project/web && npm install lucide-react 2>&1 | tail -5)",
+      "Bash(npm ls lucide-react 2>/dev/null || echo \"NOT INSTALLED\")",
+      "Bash(npx tsc --noEmit --pretty 2>&1 | head -50)",
+      "Bash(npx tsc --noEmit --pretty 2>&1 | head -60)",
+      "Bash(npx tsc --noEmit --pretty 2>&1 | head -80)",
+      "Bash(npx next build 2>&1 | tail -40)",
+      "Bash(git status -u)",
+      "Bash(git add \\\\\n  package.json package-lock.json \\\\\n  src/app/globals.css \\\\\n  src/app/layout.tsx \\\\\n  src/app/lesson/[id]/page.tsx \\\\\n  src/app/lesson/[id]/review/page.tsx \\\\\n  src/app/setup/page.tsx \\\\\n  src/components/lesson/LessonControls.tsx \\\\\n  src/components/lesson/PushToTalkButton.tsx \\\\\n  src/components/lesson/StatusIndicator.tsx \\\\\n  src/components/lesson/TranscriptPanel.tsx \\\\\n  src/components/review/FlashcardsTab.tsx \\\\\n  src/components/review/SummaryTab.tsx \\\\\n  src/components/review/VocabTable.tsx \\\\\n  src/components/setup/SetupForm.tsx \\\\\n  src/components/setup/VoiceSelector.tsx \\\\\n  src/components/ui/Button.tsx \\\\\n  src/components/ui/Card.tsx \\\\\n  src/components/ui/Input.tsx \\\\\n  src/components/ui/Toggle.tsx \\\\\n  src/hooks/useAudioRecorder.ts \\\\\n  src/hooks/usePushToTalk.ts \\\\\n  src/hooks/useMicDevices.ts \\\\\n  src/stores/settingsStore.ts \\\\\n  tailwind.config.ts && git status --short)",
+      "Bash(git commit -m \"$\\(cat <<'EOF'\nComplete SaaS UI redesign: Clean Minimal style\n\nDesign system:\n- Font: Plus Jakarta Sans \\(replaces Nunito\\), Prompt for Thai\n- Color: white/slate-50 surfaces, blue-600 single accent\n- Icons: Lucide React \\(replaces all emojis\\)\n- Borders: 1px slate-200, rounded-lg max\n- No gradients, no colored shadows\n\nPages redesigned:\n- Setup: clean form sections, flat inputs, mic device selector\n- Lesson: minimal topbar, clean transcript cards, subtle status indicator\n- Review: pill tabs, clean stats, simple vocab rows, flat flashcards\n\nNew features:\n- Microphone device selector \\(useMicDevices hook\\)\n- Device selection persisted in settingsStore\n- deviceId plumbed through useAudioRecorder + usePushToTalk\n\nComponents updated:\n- Button: solid fills, no gradients\n- Card: single clean style\n- Input: compact, blue focus ring\n- Toggle: solid blue-600 track\n- StatusIndicator: single row with dot + text\n- PushToTalkButton: pill shape, no pulse rings\n- LessonControls: segmented mode toggle\n- TranscriptPanel: stacked original/translation cards\n- VoiceSelector: horizontal pill buttons\n- All review components: clean minimal\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(cd /root/project/web && npx next build 2>&1 | tail -15)",
+      "Bash(env | grep -i eleven 2>/dev/null || echo \"No ELEVEN* env vars found\"; env | grep -i openai 2>/dev/null || echo \"No OPENAI* env vars found\")",
+      "Bash(cd /root/project/web && npx next build 2>&1 | tail -60)",
+      "Bash(git add web/src/app/globals.css web/tailwind.config.ts web/src/app/layout.tsx web/src/app/setup/page.tsx web/src/components/setup/SetupForm.tsx web/src/components/setup/VoiceSelector.tsx web/src/app/lesson/[id]/page.tsx web/src/components/lesson/TranscriptPanel.tsx web/src/components/lesson/StatusIndicator.tsx web/src/components/lesson/PushToTalkButton.tsx web/src/components/lesson/LessonControls.tsx web/src/app/lesson/[id]/review/page.tsx web/src/components/review/SummaryTab.tsx web/src/components/review/VocabTable.tsx web/src/components/review/FlashcardsTab.tsx web/src/components/ui/Button.tsx web/src/components/ui/Card.tsx web/src/components/ui/Input.tsx web/src/components/ui/Toggle.tsx)",
+      "Bash(git commit -m \"$\\(cat <<'EOF'\nfeat\\(web\\): Dark Glass UI redesign — glassmorphism + cyan/violet accents\n\nComplete UI overhaul with Arc Browser/Raycast-inspired dark glass aesthetic:\n- Outfit font, dark bg \\(#0a0a0f\\), glass cards with backdrop-blur\n- Cyan \\(#06b6d4\\) + violet \\(#8b5cf6\\) accent system\n- Noise texture overlay, gradient mesh background\n- All pages rewritten: setup, lesson, review\n- All components updated: controls, transcript, status, buttons\n- Fully responsive with mobile-first approach\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }
