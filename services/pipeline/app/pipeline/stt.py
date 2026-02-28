@@ -69,7 +69,9 @@ class SttProcessor:
         text = " ".join(texts)
 
         # Sanity check: if output is way too long for audio duration, likely hallucination
-        if text and len(text) > duration * 20:  # ~20 chars/sec is max speaking speed
+        # Thai uses ~40-60 chars/sec (no spaces, dense script)
+        max_chars_per_sec = 50
+        if text and len(text) > duration * max_chars_per_sec:
             logger.warning("STT: output too long for %.1fs audio (%d chars), likely hallucination: %s",
                            duration, len(text), text[:60])
             return ""
