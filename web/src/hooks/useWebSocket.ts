@@ -4,6 +4,7 @@ import { useRef, useCallback, useEffect, useState } from 'react';
 import { WS_URL } from '@/lib/constants';
 import { useTranscriptStore } from '@/stores/transcriptStore';
 import { useLessonStore } from '@/stores/lessonStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import type { WSIncomingMessage, WSOutgoingMessage } from '@/lib/types';
 
 interface UseWebSocketOptions {
@@ -134,7 +135,15 @@ export function useWebSocket({
 
     ws.onopen = () => {
       setIsConnected(true);
-      sendJSON({ type: 'session.create', session_id: sessionId });
+      const s = useSettingsStore.getState();
+      sendJSON({
+        type: 'session.create',
+        session_id: sessionId,
+        source_lang: s.sourceLang,
+        target_lang: s.targetLang,
+        voice: s.voiceType,
+        denoise: s.noiseCancellation,
+      });
     };
 
     ws.onmessage = handleMessage;

@@ -87,7 +87,7 @@ export interface Flashcard {
 // ─── WebSocket Messages ────────────────────────────────────────────
 
 export type WSOutgoingMessage =
-  | { type: 'session.create'; session_id: string }
+  | { type: 'session.create'; session_id: string; source_lang?: string; target_lang?: string; voice?: string; denoise?: boolean }
   | { type: 'input_audio.start' }
   | { type: 'input_audio.stop' }
   | { type: 'session.pause' }
