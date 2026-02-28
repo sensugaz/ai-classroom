@@ -8,6 +8,7 @@ export function useAudioPlayback(sampleRate = AUDIO_SAMPLE_RATE_OUTPUT) {
   const audioContextRef = useRef<AudioContext | null>(null);
   const queueRef = useRef<ArrayBuffer[]>([]);
   const isPlayingRef = useRef(false);
+  const currentSourceRef = useRef<AudioBufferSourceNode | null>(null);
 
   const getAudioContext = useCallback(() => {
     if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
@@ -47,8 +48,10 @@ export function useAudioPlayback(sampleRate = AUDIO_SAMPLE_RATE_OUTPUT) {
       const source = ctx.createBufferSource();
       source.buffer = audioBuffer;
       source.connect(ctx.destination);
+      currentSourceRef.current = source;
 
       source.onended = () => {
+        currentSourceRef.current = null;
         if (queueRef.current.length > 0) {
           // More in queue — play immediately
           isPlayingRef.current = false;
@@ -83,6 +86,14 @@ export function useAudioPlayback(sampleRate = AUDIO_SAMPLE_RATE_OUTPUT) {
 
   const clearQueue = useCallback(() => {
     queueRef.current = [];
+    // Stop currently playing audio immediately
+    if (currentSourceRef.current) {
+      try {
+        currentSourceRef.current.onended = null;
+        currentSourceRef.current.stop();
+      } catch { /* already stopped */ }
+      currentSourceRef.current = null;
+    }
     isPlayingRef.current = false;
     setIsPlaying(false);
   }, []);

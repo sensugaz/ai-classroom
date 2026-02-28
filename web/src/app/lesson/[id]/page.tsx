@@ -32,7 +32,7 @@ export default function LessonPage() {
   const [initialized, setInitialized] = useState(false);
 
   // Audio playback
-  const { isPlaying, enqueue: enqueueAudio, close: closePlayback } = useAudioPlayback();
+  const { isPlaying, enqueue: enqueueAudio, clearQueue, close: closePlayback } = useAudioPlayback();
   const isPlayingRef = useRef(false);
 
   // Keep ref in sync for use in audio callback
@@ -53,10 +53,31 @@ export default function LessonPage() {
   });
 
   // Audio recorder (for real-time mode)
-  // Skip sending audio while TTS is playing to prevent feedback loop
+  // During TTS playback: detect loud speech (barge-in) → stop TTS and resume sending
+  // During silence: send audio normally
+  const BARGE_IN_THRESHOLD = 0.08; // RMS threshold to detect real speech over echo
+
   const { isRecording, startRecording, stopRecording } = useAudioRecorder({
     onAudioData: (data) => {
-      if (status === 'active' && mode === 'realtime' && !isPlayingRef.current) {
+      if (status !== 'active' || mode !== 'realtime') return;
+
+      if (isPlayingRef.current) {
+        // Check audio energy — if user is speaking, stop TTS (barge-in)
+        const int16 = new Int16Array(data);
+        let sumSq = 0;
+        for (let i = 0; i < int16.length; i++) {
+          const sample = int16[i] / 32768;
+          sumSq += sample * sample;
+        }
+        const rms = Math.sqrt(sumSq / int16.length);
+
+        if (rms > BARGE_IN_THRESHOLD) {
+          // User is speaking — interrupt TTS
+          clearQueue();
+          sendAudio(data);
+        }
+        // Otherwise ignore (echo from TTS speaker)
+      } else {
         sendAudio(data);
       }
     },
