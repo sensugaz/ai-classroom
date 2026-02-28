@@ -33,6 +33,12 @@ class SttProcessor:
             logger.info("STT: audio too short (%.2fs), skipping", duration)
             return ""
 
+        # Energy check — skip silent/quiet audio to prevent hallucination
+        rms = float(np.sqrt(np.mean(audio ** 2)))
+        if rms < 0.01:
+            logger.info("STT: audio too quiet (rms=%.4f), skipping", rms)
+            return ""
+
         segments, info = self.model.transcribe(
             audio,
             language=language,
