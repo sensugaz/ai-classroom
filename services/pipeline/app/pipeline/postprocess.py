@@ -32,7 +32,7 @@ class SttPostProcessor:
             from transformers import AutoModelForCausalLM, AutoTokenizer
             import torch
 
-            model_name = "Qwen/Qwen2.5-3B-Instruct"
+            model_name = "Qwen/Qwen3-4B-Instruct-2507"
             logger.info("Loading STT post-processor: %s", model_name)
 
             self.tokenizer = AutoTokenizer.from_pretrained(model_name)
