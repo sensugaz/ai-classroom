@@ -22,7 +22,8 @@
       "Bash(ls /root/project/web/package*.json 2>/dev/null)",
       "Bash(docker build ./root/project/web 2>&1 | tail -50)",
       "Bash(mkdir -p /root/project/nginx/certs && openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /root/project/nginx/certs/selfsigned.key -out /root/project/nginx/certs/selfsigned.crt -subj \"/C=TH/ST=Bangkok/L=Bangkok/O=Classroom/CN=172.25.110.23\" 2>&1)",
-      "Bash(git add services/pipeline/scripts/download_voices.py)"
+      "Bash(git add services/pipeline/scripts/download_voices.py)",
+      "Bash(git add -A && git diff --cached --stat)"
     ]
   }
 }
