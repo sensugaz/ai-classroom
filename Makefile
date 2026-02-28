@@ -1,4 +1,4 @@
-.PHONY: backend frontend pipeline mongo all stop clean push
+.PHONY: backend frontend pipeline mongo all stop clean push download-voices
 
 # --- Individual services (local dev, no Docker) ---
 
@@ -43,6 +43,9 @@ install-pipeline:
 
 generate-voices:
 	cd services/pipeline && python scripts/generate_references.py
+
+download-voices:
+	cd services/pipeline && pip install datasets soundfile && python scripts/download_voices.py
 
 # --- Build ---
 
