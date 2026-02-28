@@ -2,6 +2,7 @@ package session
 
 import (
 	"context"
+	"log"
 
 	"classroom-api/internal/model"
 	"classroom-api/internal/svc"
@@ -48,6 +49,11 @@ func (l *CreateSessionLogic) CreateSession(req *CreateSessionRequest) (*model.Se
 	result, err := l.svcCtx.SessionModel.Insert(l.ctx, session)
 	if err != nil {
 		return nil, err
+	}
+
+	// Invalidate session list cache
+	if err := l.svcCtx.Cache.Delete(l.ctx, "sessions:list"); err != nil {
+		log.Printf("cache delete error for sessions:list: %v", err)
 	}
 
 	return result, nil

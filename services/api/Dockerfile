@@ -1,8 +1,9 @@
 FROM golang:1.22-alpine AS builder
 WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod download
+COPY go.mod go.sum* ./
+RUN go mod download || true
 COPY . .
+RUN go mod tidy
 RUN CGO_ENABLED=0 go build -o /classroom-api classroom.go
 
 FROM alpine:3.19

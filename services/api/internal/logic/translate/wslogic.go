@@ -3,6 +3,7 @@ package translate
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 
@@ -139,5 +140,11 @@ func (l *WsLogic) saveSegment(sessionID primitive.ObjectID, data json.RawMessage
 	ctx := context.Background()
 	if err := l.svcCtx.SessionModel.AddSegment(ctx, sessionID, segment); err != nil {
 		log.Printf("failed to save segment: %v", err)
+	}
+
+	// Invalidate session cache (segments changed)
+	cacheKey := fmt.Sprintf("session:%s", sessionID.Hex())
+	if err := l.svcCtx.Cache.Delete(ctx, cacheKey); err != nil {
+		log.Printf("cache delete error for %s: %v", cacheKey, err)
 	}
 }

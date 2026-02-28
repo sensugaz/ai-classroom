@@ -2,10 +2,11 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { useAudioRecorder } from './useAudioRecorder';
+import type { WSOutgoingMessage } from '@/lib/types';
 
 interface UsePushToTalkOptions {
   sendAudio: (data: ArrayBuffer) => void;
-  sendJSON: (msg: object) => void;
+  sendJSON: (msg: WSOutgoingMessage) => void;
 }
 
 export function usePushToTalk({ sendAudio, sendJSON }: UsePushToTalkOptions) {

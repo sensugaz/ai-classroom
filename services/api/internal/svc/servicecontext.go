@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"classroom-api/internal/cache"
 	"classroom-api/internal/config"
 	"classroom-api/internal/llmclient"
 	"classroom-api/internal/model"
@@ -22,6 +23,7 @@ type ServiceContext struct {
 	SessionModel   *model.SessionModel
 	PipelineClient *pipelineclient.PipelineClient
 	LlmClient      *llmclient.LlmClient
+	Cache          *cache.Cache
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -34,6 +36,9 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	}
 	if apiKey := os.Getenv("OPENROUTER_API_KEY"); apiKey != "" {
 		c.OpenRouter.ApiKey = apiKey
+	}
+	if redisHost := os.Getenv("REDIS_HOST"); redisHost != "" {
+		c.Redis.Host = redisHost
 	}
 
 	// Connect to MongoDB
@@ -64,6 +69,12 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		c.OpenRouter.Model,
 	)
 
+	// Initialize Redis cache
+	redisCache := cache.NewCache(c.Redis.Host)
+	if err := redisCache.Ping(ctx); err != nil {
+		log.Printf("warning: failed to ping Redis: %v", err)
+	}
+
 	return &ServiceContext{
 		Config:         c,
 		MongoClient:    mongoClient,
@@ -71,5 +82,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		SessionModel:   model.NewSessionModel(db),
 		PipelineClient: plClient,
 		LlmClient:      llmClient,
+		Cache:          redisCache,
 	}
 }

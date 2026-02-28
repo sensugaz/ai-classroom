@@ -9,6 +9,10 @@ type Config struct {
 		Uri string
 	}
 
+	Redis struct {
+		Host string
+	}
+
 	PipelineWsUrl string
 
 	OpenRouter struct {

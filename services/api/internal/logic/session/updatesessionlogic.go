@@ -2,6 +2,8 @@ package session
 
 import (
 	"context"
+	"fmt"
+	"log"
 
 	"classroom-api/internal/model"
 	"classroom-api/internal/svc"
@@ -53,5 +55,15 @@ func (l *UpdateSessionLogic) UpdateSession(id string, req *UpdateSessionRequest)
 		Status:            req.Status,
 	}
 
-	return l.svcCtx.SessionModel.Update(l.ctx, oid, session)
+	if err := l.svcCtx.SessionModel.Update(l.ctx, oid, session); err != nil {
+		return err
+	}
+
+	// Invalidate session cache + list cache
+	cacheKey := fmt.Sprintf("session:%s", id)
+	if err := l.svcCtx.Cache.Delete(l.ctx, cacheKey, "sessions:list"); err != nil {
+		log.Printf("cache delete error: %v", err)
+	}
+
+	return nil
 }

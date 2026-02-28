@@ -11,7 +11,7 @@ def log_gpu_memory():
     if torch.cuda.is_available():
         allocated = torch.cuda.memory_allocated() / 1024**3
         reserved = torch.cuda.memory_reserved() / 1024**3
-        total = torch.cuda.get_device_properties(0).total_mem / 1024**3
+        total = torch.cuda.get_device_properties(0).total_memory / 1024**3
         logger.info(
             "GPU Memory: %.1f GB allocated, %.1f GB reserved, %.1f GB total",
             allocated, reserved, total,

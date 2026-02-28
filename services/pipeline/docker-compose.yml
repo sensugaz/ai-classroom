@@ -1,0 +1,22 @@
+services:
+  pipeline:
+    build: .
+    ports:
+      - "9000:9000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - model-cache:/root/.cache
+      - ./voice_presets:/app/voice_presets
+    environment:
+      - DEVICE=cuda
+      - PORT=9000
+    restart: unless-stopped
+
+volumes:
+  model-cache:

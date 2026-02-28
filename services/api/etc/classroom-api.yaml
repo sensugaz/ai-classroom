@@ -5,6 +5,9 @@ Port: 8080
 Mongo:
   Uri: mongodb://mongodb:27017/classroom
 
+Redis:
+  Host: redis:6379
+
 PipelineWsUrl: ws://pipeline:9000/ws
 
 OpenRouter:

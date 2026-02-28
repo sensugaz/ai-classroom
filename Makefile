@@ -19,11 +19,16 @@ mongo:
 up:
 	docker compose up --build
 
-up-gpu:
-	docker compose --profile gpu up --build
-
 down:
 	docker compose down
+
+# --- Pipeline (runs on GPU machine) ---
+
+pipeline-up:
+	cd services/pipeline && docker compose up --build
+
+pipeline-down:
+	cd services/pipeline && docker compose down
 
 # --- Setup ---
 
