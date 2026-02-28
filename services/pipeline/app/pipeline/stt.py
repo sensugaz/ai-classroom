@@ -52,6 +52,8 @@ class SttProcessor:
             condition_on_previous_text=False,  # Prevent hallucination chains
             no_speech_threshold=0.6,  # Filter low-confidence segments
             log_prob_threshold=-1.0,  # Filter unlikely transcriptions
+            repetition_penalty=1.2,  # Penalize repeated tokens
+            word_timestamps=True,  # Helps with Thai word boundaries
         )
 
         # Filter segments by confidence
