@@ -34,8 +34,6 @@ class SttProcessor:
             logger.info("STT: audio too short (%.2fs), skipping", duration)
             return ""
 
-        initial_prompt = "สวัสดีครับ" if language == "th" else None
-
         segments, info = self.model.transcribe(
             audio,
             language=language,
@@ -44,7 +42,6 @@ class SttProcessor:
             condition_on_previous_text=False,
             no_speech_threshold=0.6,
             log_prob_threshold=-0.5,
-            initial_prompt=initial_prompt,
             temperature=0.0,
         )
 
