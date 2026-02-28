@@ -65,7 +65,7 @@ class TtsProcessor:
         logger.info("[TTS] Kokoro [voice=%s, lang=%s]: %s", kokoro_voice, lang_code, text[:80])
 
         audio_chunks = []
-        for _, _, audio in self._kokoro_pipeline(text, voice=kokoro_voice):
+        for _, _, audio in self._kokoro_pipeline(text, voice=kokoro_voice, speed=1.0):
             if audio is not None:
                 audio_chunks.append(audio)
 
