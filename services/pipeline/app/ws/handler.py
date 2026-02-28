@@ -96,7 +96,7 @@ class ConnectionHandler:
 
         if not session.is_recording:
             # Real-time mode: run VAD on accumulated buffer
-            # Process in chunks when we have enough data (~500ms = 16000 samples/s * 0.5s * 2 bytes)
+            # Feed ~500ms chunks to VAD (VAD internally processes 512-sample windows)
             chunk_size = 16000  # 500ms of 16-bit 16kHz mono
             if len(session.audio_buffer) >= chunk_size:
                 audio_data = session.clear_buffer()

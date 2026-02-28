@@ -1,9 +1,14 @@
+import torch
 from pydantic_settings import BaseSettings
+
+
+def _default_device() -> str:
+    return "cuda" if torch.cuda.is_available() else "cpu"
 
 
 class Settings(BaseSettings):
     port: int = 9000
-    device: str = "cuda"
+    device: str = _default_device()
     whisper_model: str = "large-v3"
     nllb_model: str = "facebook/nllb-200-3.3B"
     vad_threshold: float = 0.5
