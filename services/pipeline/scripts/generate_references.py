@@ -1,54 +1,41 @@
-"""Generate voice reference audio using simple single-speaker TTS models.
+"""Generate voice reference audio using espeak-ng.
 
 Usage:
     python scripts/generate_references.py
 
-This creates reference WAV files in voice_presets/ for XTTS-v2 voice cloning.
-Uses lightweight single-speaker models (no GPU needed, ~30s to run).
+Creates reference WAV files in voice_presets/ for XTTS-v2 voice cloning.
+Uses espeak-ng (no GPU needed, runs in seconds).
 """
 
-import sys
+import subprocess
+import shutil
 from pathlib import Path
-
-# Add parent to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 VOICE_PRESETS_DIR = Path(__file__).parent.parent / "voice_presets"
 
-# Models to use for generating reference audio
-# These are small single-speaker models that don't need reference audio themselves
-MODELS = {
-    "en_female": "tts_models/en/ljspeech/tacotron2-DDC",
-    "en_male": "tts_models/en/ljspeech/tacotron2-DDC",  # same model, we'll pitch-shift
+# espeak-ng voice mapping
+VOICES = {
+    "adult_female": "en-us+f3",
+    "adult_male": "en-us",
+    "child_female": "en-us+f4",
+    "child_male": "en-us+m3",
 }
 
-TEXTS = {
-    "en": (
-        "Hello everyone, welcome to today's classroom session. "
-        "We will be learning something new and exciting together. "
-        "Let's get started with our lesson."
-    ),
-}
+TEXT = (
+    "Hello everyone, welcome to today's classroom session. "
+    "We will be learning something new and exciting together. "
+    "Let's get started with our lesson."
+)
+
 
 def generate():
-    from TTS.api import TTS
-    import numpy as np
-    import wave
-
-    print("Loading TTS model for reference generation...")
-    tts = TTS("tts_models/en/ljspeech/tacotron2-DDC")
-
-    voices = {
-        "adult_female": {"pitch_factor": 1.0},
-        "adult_male": {"pitch_factor": 0.85},
-        "child_female": {"pitch_factor": 1.2},
-        "child_male": {"pitch_factor": 1.1},
-    }
+    # Check espeak-ng is installed
+    if not shutil.which("espeak-ng"):
+        print("ERROR: espeak-ng not installed. Run: sudo apt-get install -y espeak-ng")
+        return
 
     for lang in ["en", "th"]:
-        text = TEXTS.get(lang, TEXTS["en"])
-
-        for voice_type, params in voices.items():
+        for voice_type, espeak_voice in VOICES.items():
             voice_dir = VOICE_PRESETS_DIR / lang / voice_type
             voice_dir.mkdir(parents=True, exist_ok=True)
 
@@ -59,31 +46,18 @@ def generate():
 
             print(f"  Generating {lang}/{voice_type}...")
 
-            # Generate with base model
-            wav = tts.tts(text=text)
-            audio = np.array(wav, dtype=np.float32)
+            result = subprocess.run(
+                ["espeak-ng", "-v", espeak_voice, "-s", "130", "-w", str(wav_file), TEXT],
+                capture_output=True,
+                timeout=10,
+            )
 
-            # Pitch shift by resampling
-            pitch_factor = params["pitch_factor"]
-            if pitch_factor != 1.0:
-                indices = np.arange(0, len(audio), pitch_factor)
-                indices = indices[indices < len(audio)].astype(int)
-                audio = audio[indices]
+            if result.returncode != 0:
+                print(f"  ERROR: {result.stderr.decode()}")
+                continue
 
-            # Normalize
-            audio = audio / (np.abs(audio).max() + 1e-6) * 0.9
-
-            # Save as WAV
-            sr = tts.synthesizer.output_sample_rate
-            pcm = (audio * 32767).astype(np.int16)
-            with wave.open(str(wav_file), "w") as wf:
-                wf.setnchannels(1)
-                wf.setsampwidth(2)
-                wf.setframerate(sr)
-                wf.writeframes(pcm.tobytes())
-
-            duration = len(audio) / sr
-            print(f"  Created {wav_file} ({duration:.1f}s)")
+            size = wav_file.stat().st_size
+            print(f"  Created {wav_file} ({size} bytes)")
 
     print("\nDone! Reference audio files created in voice_presets/")
     print("Tip: Replace with real human voice WAV files for better quality.")
