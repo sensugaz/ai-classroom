@@ -23,6 +23,7 @@ dependencies = [
     "soundfile>=0.12.0",
     "pyopenjtalk>=0.4.0",
     "misaki[ja,zh]>=0.8.0",
+    "deep-translator>=1.11.0",
 ]
 
 [tool.setuptools.packages.find]

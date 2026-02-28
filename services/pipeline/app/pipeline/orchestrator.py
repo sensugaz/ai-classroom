@@ -43,7 +43,7 @@ class PipelineOrchestrator:
 
         t0 = time.time()
         self.translate.load()
-        logger.info("[LOAD] Translate (NLLB-200): %.1fs", time.time() - t0)
+        logger.info("[LOAD] Translate (Google/NLLB): %.1fs", time.time() - t0)
 
         t0 = time.time()
         self.tts.load()
