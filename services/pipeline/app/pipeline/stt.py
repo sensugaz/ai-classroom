@@ -1,4 +1,4 @@
-"""OpenAI gpt-4o-mini-transcribe STT via API."""
+"""OpenAI gpt-4o-transcribe STT via API."""
 
 import io
 import logging
@@ -21,7 +21,7 @@ class SttProcessor:
         if self.api_key:
             from openai import OpenAI
             self.client = OpenAI(api_key=self.api_key)
-            logger.info("STT: OpenAI gpt-4o-mini-transcribe ready")
+            logger.info("STT: OpenAI gpt-4o-transcribe ready")
         else:
             from faster_whisper import WhisperModel
             compute_type = "float16" if self.device == "cuda" else "int8"
@@ -61,7 +61,7 @@ class SttProcessor:
             buf.name = "audio.wav"
 
             result = self.client.audio.transcriptions.create(
-                model="gpt-4o-mini-transcribe",
+                model="gpt-4o-transcribe",
                 file=buf,
                 language=language,
             )
