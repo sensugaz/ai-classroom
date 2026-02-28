@@ -27,7 +27,9 @@
       "Bash(git commit -m \"$\\(cat <<'EOF'\nSwitch NLLB from 3.3B to distilled-600M for faster translation\n\n3.3B model causes 4-5s latency and hallucination on short phrases.\n600M is 5-10x faster \\(~200-500ms\\) with acceptable quality.\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git push)",
       "Bash(git add services/pipeline/app/pipeline/tts.py services/pipeline/scripts/generate_references.py && git diff --cached --stat)",
-      "Bash(grep -r \"SessionCreate\" /root/project/services/api --include=\"*.go\" 2>/dev/null | head -20)"
+      "Bash(grep -r \"SessionCreate\" /root/project/services/api --include=\"*.go\" 2>/dev/null | head -20)",
+      "Bash(pip install kokoro soundfile 2>&1 | tail -20)",
+      "Bash(which python3 && python3 -m pip install kokoro soundfile 2>&1 | tail -30)"
     ]
   }
 }
