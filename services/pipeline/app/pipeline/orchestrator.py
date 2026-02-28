@@ -19,7 +19,7 @@ class PipelineOrchestrator:
         self.denoise = DenoiseProcessor()
         self.vad = VadProcessor(threshold=settings.vad_threshold)
         self.stt = SttProcessor(model_size=settings.whisper_model, device=settings.device)
-        self.translate = TranslateProcessor(model_name=settings.nllb_model, device=settings.device)
+        self.translate = TranslateProcessor(model_name=settings.translate_model, device=settings.device)
         self.tts = TtsProcessor(device=settings.device, voice_presets_dir=settings.voice_presets_dir)
 
     def load_models(self):
