@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     'Real-time classroom translation for teachers - Thai, English and more',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
     title: 'Classroom Translator',
   },
   formatDetection: {
@@ -21,7 +21,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#ffffff',
+  themeColor: '#0a0a0f',
 };
 
 export default function RootLayout({
@@ -30,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -41,7 +41,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta
           name="apple-mobile-web-app-status-bar-style"
-          content="default"
+          content="black-translucent"
         />
         <meta name="apple-mobile-web-app-title" content="Translator" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />

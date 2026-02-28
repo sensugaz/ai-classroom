@@ -53,7 +53,7 @@ export default function SummaryTab({ sessionId }: SummaryTabProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16 gap-3">
-        <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
+        <Loader2 className="w-5 h-5 text-cyan-400 animate-spin" />
         <p className="text-sm text-slate-500">Generating summary...</p>
       </div>
     );
@@ -61,10 +61,10 @@ export default function SummaryTab({ sessionId }: SummaryTabProps) {
 
   if (error) {
     return (
-      <div className="border border-slate-200 rounded-lg p-6 bg-white">
+      <div className="rounded-xl bg-white/5 backdrop-blur border border-rose-500/30 p-6">
         <div className="flex items-center justify-center gap-2">
-          <AlertCircle className="w-5 h-5 text-red-500" />
-          <p className="text-sm text-red-600 font-medium">{error}</p>
+          <AlertCircle className="w-5 h-5 text-rose-400" />
+          <p className="text-sm text-rose-300 font-medium">{error}</p>
         </div>
       </div>
     );
@@ -76,21 +76,21 @@ export default function SummaryTab({ sessionId }: SummaryTabProps) {
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="border border-slate-200 rounded-lg bg-white p-4">
+        <div className="rounded-xl bg-white/5 backdrop-blur border border-white/[0.08] p-4">
           <div className="flex items-center gap-2 mb-1">
-            <Clock className="w-4 h-4 text-slate-400" />
+            <Clock className="w-4 h-4 text-cyan-400" />
             <p className="text-sm text-slate-500">Duration</p>
           </div>
-          <p className="text-2xl font-semibold text-slate-900">
+          <p className="text-2xl font-bold text-slate-100">
             {summary.duration_minutes} min
           </p>
         </div>
-        <div className="border border-slate-200 rounded-lg bg-white p-4">
+        <div className="rounded-xl bg-white/5 backdrop-blur border border-white/[0.08] p-4">
           <div className="flex items-center gap-2 mb-1">
-            <MessageSquare className="w-4 h-4 text-slate-400" />
+            <MessageSquare className="w-4 h-4 text-cyan-400" />
             <p className="text-sm text-slate-500">Segments</p>
           </div>
-          <p className="text-2xl font-semibold text-slate-900">
+          <p className="text-2xl font-bold text-slate-100">
             {summary.segment_count}
           </p>
         </div>
@@ -98,17 +98,17 @@ export default function SummaryTab({ sessionId }: SummaryTabProps) {
 
       {/* Key Points */}
       {summary.key_points.length > 0 && (
-        <div>
-          <h3 className="text-sm font-medium text-slate-900 mb-3">
+        <div className="rounded-xl bg-white/5 backdrop-blur border border-white/[0.08] p-5">
+          <h3 className="text-sm font-medium text-slate-100 mb-3">
             Key Points
           </h3>
           <ul className="space-y-2">
             {summary.key_points.map((point, i) => (
               <li
                 key={i}
-                className="flex items-start gap-2.5 text-sm text-slate-600"
+                className="flex items-start gap-2.5 text-sm text-slate-400"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-1.5 shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 shrink-0" />
                 <span>{point}</span>
               </li>
             ))}
@@ -118,20 +118,20 @@ export default function SummaryTab({ sessionId }: SummaryTabProps) {
 
       {/* Bilingual summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="border border-slate-200 rounded-lg bg-white p-4">
-          <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-3">
+        <div className="rounded-xl bg-white/5 backdrop-blur border border-white/[0.08] p-4">
+          <h3 className="text-xs font-medium text-slate-500 uppercase tracking-widest mb-3">
             Original
           </h3>
-          <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+          <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-line">
             {summary.original}
           </p>
         </div>
 
-        <div className="border border-slate-200 rounded-lg bg-white p-4">
-          <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-3">
+        <div className="rounded-xl bg-white/5 backdrop-blur border border-white/[0.08] p-4">
+          <h3 className="text-xs font-medium text-slate-500 uppercase tracking-widest mb-3">
             Translation
           </h3>
-          <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+          <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-line font-[Prompt]">
             {summary.translated}
           </p>
         </div>

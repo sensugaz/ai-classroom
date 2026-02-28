@@ -5,6 +5,7 @@ import type { HTMLAttributes, ReactNode } from 'react';
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
   padding?: 'none' | 'sm' | 'md' | 'lg';
+  interactive?: boolean;
 }
 
 const paddingClasses: Record<string, string> = {
@@ -17,13 +18,15 @@ const paddingClasses: Record<string, string> = {
 export default function Card({
   children,
   padding = 'md',
+  interactive = false,
   className = '',
   ...props
 }: CardProps) {
   return (
     <div
       className={`
-        bg-white border border-slate-200 rounded-lg
+        glass rounded-xl
+        ${interactive ? 'glass-hover' : ''}
         ${paddingClasses[padding]}
         ${className}
       `}

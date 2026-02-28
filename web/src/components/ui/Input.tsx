@@ -26,11 +26,11 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, CombinedProps>(
 
     const baseClasses = `
       w-full h-10 px-3 text-sm
-      text-slate-700 placeholder:text-slate-400
-      bg-white border rounded-lg
-      transition-colors
-      focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-0 focus:border-blue-600
-      ${error ? 'border-red-500' : 'border-slate-200'}
+      bg-white/5 border rounded-lg
+      text-slate-100 placeholder:text-slate-600
+      transition-all duration-200
+      focus:outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/20 focus:bg-white/[0.07]
+      ${error ? 'border-rose-500/50' : 'border-white/10'}
       ${icon ? 'pl-9' : ''}
       ${className}
     `;
@@ -38,13 +38,13 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, CombinedProps>(
     return (
       <div>
         {label && (
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">
+          <label className="block text-sm font-medium text-slate-300 mb-1.5">
             {label}
           </label>
         )}
         <div className="relative">
           {icon && (
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
               {icon}
             </span>
           )}
@@ -63,7 +63,7 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, CombinedProps>(
           )}
         </div>
         {error && (
-          <p className="text-sm text-red-500 mt-1">{error}</p>
+          <p className="text-sm text-rose-400 mt-1">{error}</p>
         )}
       </div>
     );

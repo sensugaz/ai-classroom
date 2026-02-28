@@ -22,16 +22,17 @@ export default function VoiceSelector({ value, onChange, targetLang }: VoiceSele
             type="button"
             onClick={() => onChange(voice.type as VoiceType)}
             className={`
-              inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg
-              text-sm font-medium transition-colors duration-150
-              focus:outline-none focus:ring-2 focus:ring-blue-600/20
+              inline-flex items-center px-4 py-2 rounded-full
+              text-sm font-medium transition-all duration-200
+              focus:outline-none focus:ring-1 focus:ring-cyan-400/30
+              border backdrop-blur-sm
               ${isSelected
-                ? 'bg-blue-600 text-white'
-                : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900'
+                ? 'bg-cyan-500/20 border-cyan-400/40 text-cyan-300 glow-cyan-sm'
+                : 'bg-white/5 border-white/[0.08] text-slate-400 hover:text-slate-200 hover:border-white/[0.15]'
               }
             `}
           >
-            <span>{voice.label}</span>
+            {voice.label}
           </button>
         );
       })}

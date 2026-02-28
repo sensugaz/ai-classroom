@@ -33,26 +33,27 @@ export default function PushToTalkButton({
         }}
         onTouchCancel={onPressEnd}
         className={`
-          w-full max-w-sm h-12 rounded-xl
+          w-full max-w-sm h-14 rounded-xl
           flex items-center justify-center gap-2.5
           transition-all duration-150 ease-out
           touch-manipulation select-none
-          focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2
+          font-semibold
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dark
           disabled:opacity-40 disabled:cursor-not-allowed
           ${
             isPressed
-              ? 'bg-blue-600 text-white scale-[0.98]'
-              : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+              ? 'bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 glow-cyan scale-[0.98]'
+              : 'glass text-slate-300 hover:bg-white/[0.08] hover:border-white/[0.12]'
           }
         `}
       >
-        <span className={`relative flex items-center justify-center ${isPressed ? '' : ''}`}>
+        <span className="relative flex items-center justify-center">
           {isPressed && (
-            <span className="absolute inset-0 -m-1.5 rounded-full bg-white/20 animate-ping" />
+            <span className="absolute inset-0 -m-2 rounded-full bg-cyan-400/20 animate-ping" />
           )}
           <Mic className="w-5 h-5 relative" />
         </span>
-        <span className="text-sm font-semibold">
+        <span className="text-sm">
           {isPressed ? 'Release to send' : 'Hold to speak'}
         </span>
       </button>

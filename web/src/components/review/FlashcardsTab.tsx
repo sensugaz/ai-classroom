@@ -76,7 +76,7 @@ export default function FlashcardsTab({ sessionId }: FlashcardsTabProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16 gap-3">
-        <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
+        <Loader2 className="w-5 h-5 text-cyan-400 animate-spin" />
         <p className="text-sm text-slate-500">Loading flashcards...</p>
       </div>
     );
@@ -84,10 +84,10 @@ export default function FlashcardsTab({ sessionId }: FlashcardsTabProps) {
 
   if (error) {
     return (
-      <div className="border border-slate-200 rounded-lg p-6 bg-white">
+      <div className="rounded-xl bg-white/5 backdrop-blur border border-rose-500/30 p-6">
         <div className="flex items-center justify-center gap-2">
-          <AlertCircle className="w-5 h-5 text-red-500" />
-          <p className="text-sm text-red-600 font-medium">{error}</p>
+          <AlertCircle className="w-5 h-5 text-rose-400" />
+          <p className="text-sm text-rose-300 font-medium">{error}</p>
         </div>
       </div>
     );
@@ -95,8 +95,8 @@ export default function FlashcardsTab({ sessionId }: FlashcardsTabProps) {
 
   if (cards.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 gap-3">
-        <Layers className="w-8 h-8 text-slate-300" />
+      <div className="flex flex-col items-center justify-center py-16 gap-3 rounded-xl bg-white/5 backdrop-blur border border-white/[0.08]">
+        <Layers className="w-8 h-8 text-slate-600" />
         <p className="text-sm text-slate-500">
           No flashcards available for this lesson.
         </p>
@@ -115,9 +115,9 @@ export default function FlashcardsTab({ sessionId }: FlashcardsTabProps) {
       </p>
 
       {/* Progress bar */}
-      <div className="w-full max-w-md h-1 bg-slate-200 rounded-lg overflow-hidden">
+      <div className="w-full max-w-md h-1 bg-white/5 rounded-full overflow-hidden">
         <div
-          className="h-full bg-blue-600 rounded-lg transition-all duration-300"
+          className="h-full bg-cyan-500 rounded-full transition-all duration-300"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -143,41 +143,41 @@ export default function FlashcardsTab({ sessionId }: FlashcardsTabProps) {
           >
             {/* Front */}
             <div
-              className="w-full min-h-[280px] p-8 bg-white border border-slate-200 rounded-lg flex flex-col items-center justify-center gap-3"
+              className="w-full min-h-[280px] p-8 rounded-xl bg-white/5 backdrop-blur border border-white/[0.08] flex flex-col items-center justify-center gap-3 shadow-[0_0_20px_rgba(6,182,212,0.08)]"
               style={{ backfaceVisibility: 'hidden' }}
             >
-              <p className="text-2xl font-semibold text-slate-900 text-center">
+              <p className="text-2xl font-semibold text-slate-100 text-center">
                 {card.front}
               </p>
               {card.phonetic && (
-                <p className="text-sm text-slate-400 italic">
+                <p className="text-sm text-slate-500 italic">
                   /{card.phonetic}/
                 </p>
               )}
-              <p className="text-xs text-slate-400 mt-4">
+              <p className="text-xs text-slate-600 mt-4">
                 Tap to flip
               </p>
             </div>
 
             {/* Back */}
             <div
-              className="absolute inset-0 w-full min-h-[280px] p-8 bg-slate-50 border border-slate-200 rounded-lg flex flex-col items-center justify-center gap-3"
+              className="absolute inset-0 w-full min-h-[280px] p-8 rounded-xl bg-violet-500/5 backdrop-blur border border-violet-500/20 flex flex-col items-center justify-center gap-3 shadow-[0_0_20px_rgba(139,92,246,0.08)]"
               style={{
                 backfaceVisibility: 'hidden',
                 transform: 'rotateY(180deg)',
               }}
             >
-              <p className="text-2xl font-semibold text-slate-900 text-center">
+              <p className="text-2xl font-semibold text-slate-100 text-center font-[Prompt]">
                 {card.back}
               </p>
               {card.example && (
-                <div className="mt-4 px-4 py-3 bg-white border border-slate-200 rounded-lg w-full">
-                  <p className="text-sm text-slate-500 text-center">
+                <div className="mt-4 px-4 py-3 rounded-lg bg-white/5 backdrop-blur border border-white/[0.08] w-full">
+                  <p className="text-sm text-slate-400 text-center">
                     {card.example}
                   </p>
                 </div>
               )}
-              <p className="text-xs text-slate-400 mt-2">
+              <p className="text-xs text-slate-600 mt-2">
                 Tap to flip back
               </p>
             </div>
@@ -190,7 +190,7 @@ export default function FlashcardsTab({ sessionId }: FlashcardsTabProps) {
         <button
           onClick={goPrev}
           disabled={currentIndex === 0}
-          className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:text-slate-300 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-100 disabled:text-slate-700 disabled:cursor-not-allowed transition-colors rounded-lg hover:bg-white/5"
         >
           <ChevronLeft className="w-4 h-4" />
           Previous
@@ -198,7 +198,7 @@ export default function FlashcardsTab({ sessionId }: FlashcardsTabProps) {
         <button
           onClick={goNext}
           disabled={currentIndex === cards.length - 1}
-          className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:text-slate-300 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-100 disabled:text-slate-700 disabled:cursor-not-allowed transition-colors rounded-lg hover:bg-white/5"
         >
           Next
           <ChevronRight className="w-4 h-4" />

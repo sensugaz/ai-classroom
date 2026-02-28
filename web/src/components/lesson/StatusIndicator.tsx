@@ -16,44 +16,44 @@ export default function StatusIndicator({ status, isSpeaking = false }: StatusIn
 
   let icon = <Radio className="w-4 h-4" />;
   let label = 'Ready';
-  let color = 'text-slate-400';
-  let bgColor = 'bg-slate-50';
-  let dotColor = 'bg-slate-400';
+  let color = 'text-slate-500';
+  let dotColor = 'bg-slate-500';
+  let barColor = 'bg-slate-500';
   let animate = false;
 
   if (isVoiceActive) {
     icon = <Mic className="w-4 h-4" />;
     label = 'Speaking';
-    color = 'text-blue-600';
-    bgColor = 'bg-blue-50';
-    dotColor = 'bg-blue-600';
+    color = 'text-cyan-400';
+    dotColor = 'bg-cyan-400';
+    barColor = 'bg-cyan-400';
     animate = true;
   } else if (isWaiting) {
     icon = <Mic className="w-4 h-4" />;
     label = 'Listening';
-    color = 'text-slate-500';
-    bgColor = 'bg-slate-50';
-    dotColor = 'bg-blue-600';
+    color = 'text-cyan-400';
+    dotColor = 'bg-cyan-400';
+    barColor = 'bg-cyan-400';
     animate = true;
   } else if (isWorking) {
     icon = <Loader2 className="w-4 h-4 animate-spin" />;
     label = status === 'processing' ? 'Processing' : 'Translating';
-    color = 'text-amber-600';
-    bgColor = 'bg-amber-50';
-    dotColor = 'bg-amber-500';
+    color = 'text-amber-400';
+    dotColor = 'bg-amber-400';
+    barColor = 'bg-amber-400';
   } else if (isTtsSpeaking) {
     icon = <Volume2 className="w-4 h-4" />;
     label = 'Playing';
-    color = 'text-emerald-600';
-    bgColor = 'bg-emerald-50';
-    dotColor = 'bg-emerald-600';
+    color = 'text-emerald-400';
+    dotColor = 'bg-emerald-400';
+    barColor = 'bg-emerald-400';
     animate = true;
   }
 
   return (
     <div className="flex items-center justify-center">
-      <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${bgColor} transition-colors duration-200`}>
-        {/* Animated dot */}
+      <div className="glass inline-flex items-center gap-2.5 px-4 py-2 rounded-full transition-colors duration-200">
+        {/* Animated ring dot */}
         <span className="relative flex h-2 w-2">
           {animate && (
             <span className={`absolute inset-0 rounded-full ${dotColor} opacity-75 animate-ping`} />
@@ -69,13 +69,13 @@ export default function StatusIndicator({ status, isSpeaking = false }: StatusIn
           {label}
         </span>
 
-        {/* Sound wave for active voice states */}
+        {/* Sound wave bars for speaking/playing */}
         {(isVoiceActive || isTtsSpeaking) && (
           <div className="flex items-center gap-[3px] h-3.5 ml-0.5">
             {[0, 1, 2, 3].map((i) => (
               <span
                 key={i}
-                className={`w-[3px] rounded-full animate-sound-wave ${dotColor}`}
+                className={`w-[3px] rounded-full animate-sound-wave ${barColor}`}
                 style={{
                   height: '100%',
                   animationDelay: `${i * 0.12}s`,

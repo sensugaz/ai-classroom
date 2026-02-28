@@ -197,13 +197,15 @@ export default function LessonPage() {
 
   if (error && !initialized) {
     return (
-      <main className="h-screen flex items-center justify-center bg-slate-50 p-6">
-        <div className="text-center space-y-4">
-          <AlertCircle className="w-10 h-10 text-red-500 mx-auto" />
-          <p className="text-base text-red-600 font-medium">{error}</p>
+      <main className="h-screen h-[100dvh] flex items-center justify-center bg-dark p-6">
+        <div className="glass rounded-2xl p-8 text-center space-y-4 max-w-sm w-full">
+          <div className="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center mx-auto">
+            <AlertCircle className="w-6 h-6 text-rose-400" />
+          </div>
+          <p className="text-base text-rose-300 font-medium">{error}</p>
           <button
             onClick={() => router.push('/setup')}
-            className="text-sm text-blue-600 hover:text-blue-700 underline underline-offset-2"
+            className="text-sm text-cyan-400 hover:text-cyan-300 underline underline-offset-2 transition-colors"
           >
             Back to Setup
           </button>
@@ -213,35 +215,40 @@ export default function LessonPage() {
   }
 
   return (
-    <main className="h-screen h-[100dvh] flex flex-col bg-slate-50">
+    <main className="h-screen h-[100dvh] flex flex-col bg-dark">
       {/* Top Bar */}
-      <header className="shrink-0 bg-white border-b border-slate-200 px-4 py-2.5">
+      <header className="shrink-0 glass px-4 py-2.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
-            <BookOpen className="w-5 h-5 text-blue-600 shrink-0" />
-            <h1 className="text-sm font-semibold text-slate-800 truncate">
+            <BookOpen className="w-5 h-5 text-cyan-400 shrink-0" />
+            <h1 className="text-sm font-semibold text-slate-200 truncate">
               {className || 'Lesson'}
             </h1>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
             {/* Timer */}
-            <span className="text-sm font-medium text-slate-600 tabular-nums">
+            <span className="text-sm font-mono text-cyan-400 tabular-nums">
               {formatElapsed(elapsedTime)}
             </span>
 
             {/* Connection Indicator */}
-            <span
-              className={`w-2 h-2 rounded-full shrink-0 ${
-                isConnected ? 'bg-emerald-500' : 'bg-slate-300'
-              }`}
-              title={isConnected ? 'Connected' : 'Disconnected'}
-            />
+            <span className="relative flex h-2 w-2 shrink-0">
+              {isConnected && (
+                <span className="absolute inset-0 rounded-full bg-emerald-400 opacity-75 animate-ping" />
+              )}
+              <span
+                className={`relative inline-flex rounded-full h-2 w-2 ${
+                  isConnected ? 'bg-emerald-400' : 'bg-slate-600'
+                }`}
+                title={isConnected ? 'Connected' : 'Disconnected'}
+              />
+            </span>
 
             {/* Settings */}
             <button
               type="button"
-              className="p-1 text-slate-400 hover:text-slate-600 transition-colors"
+              className="p-1 text-slate-500 hover:text-slate-300 transition-colors"
               title="Settings"
             >
               <Settings className="w-4 h-4" />
@@ -252,14 +259,14 @@ export default function LessonPage() {
 
       {/* Error Banner */}
       {error && (
-        <div className="shrink-0 px-4 py-2 bg-red-50 border-b border-red-200 flex items-center justify-between gap-2">
+        <div className="shrink-0 mx-3 mt-2 px-4 py-2.5 rounded-xl bg-rose-500/10 border border-rose-400/20 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
-            <p className="text-sm text-red-600 truncate">{error}</p>
+            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+            <p className="text-sm text-rose-300 truncate">{error}</p>
           </div>
           <button
             onClick={() => setError(null)}
-            className="p-0.5 text-red-400 hover:text-red-600 transition-colors shrink-0"
+            className="p-0.5 text-rose-400/60 hover:text-rose-300 transition-colors shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
@@ -270,7 +277,7 @@ export default function LessonPage() {
       <TranscriptPanel />
 
       {/* Unified Footer */}
-      <div className="shrink-0 bg-white border-t border-slate-200 pb-safe">
+      <div className="shrink-0 glass pb-safe">
         {/* Status / PTT row */}
         <div className="px-4 pt-3 pb-2">
           {mode === 'realtime' ? (

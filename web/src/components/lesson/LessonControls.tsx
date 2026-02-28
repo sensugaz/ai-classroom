@@ -45,13 +45,13 @@ export default function LessonControls({ onModeChange }: LessonControlsProps) {
   };
 
   return (
-    <div className="flex items-center justify-between px-4 py-2 border-t border-slate-100">
+    <div className="flex items-center justify-between px-4 py-2">
       {/* Pause / Resume */}
       <button
         type="button"
         onClick={handlePauseResume}
         disabled={status !== 'active' && status !== 'paused'}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-400 hover:text-slate-200 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       >
         {status === 'paused' ? (
           <>
@@ -66,8 +66,8 @@ export default function LessonControls({ onModeChange }: LessonControlsProps) {
         )}
       </button>
 
-      {/* Mode Toggle - Segmented Control */}
-      <div className="flex items-center bg-slate-100 rounded-lg p-0.5">
+      {/* Mode Toggle - Glass Segmented Control */}
+      <div className="flex items-center bg-white/5 rounded-lg p-0.5">
         <button
           type="button"
           onClick={() => {
@@ -75,8 +75,8 @@ export default function LessonControls({ onModeChange }: LessonControlsProps) {
           }}
           className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
             mode === 'realtime'
-              ? 'bg-white text-slate-800 shadow-sm'
-              : 'text-slate-500 hover:text-slate-700'
+              ? 'bg-white/10 text-cyan-400'
+              : 'text-slate-500 hover:text-slate-300'
           }`}
         >
           <Radio className="w-3.5 h-3.5" />
@@ -89,8 +89,8 @@ export default function LessonControls({ onModeChange }: LessonControlsProps) {
           }}
           className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
             mode === 'push-to-talk'
-              ? 'bg-white text-slate-800 shadow-sm'
-              : 'text-slate-500 hover:text-slate-700'
+              ? 'bg-white/10 text-cyan-400'
+              : 'text-slate-500 hover:text-slate-300'
           }`}
         >
           <Hand className="w-3.5 h-3.5" />
@@ -102,7 +102,7 @@ export default function LessonControls({ onModeChange }: LessonControlsProps) {
       <button
         type="button"
         onClick={handleEnd}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+        className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg transition-colors"
       >
         <Square className="w-4 h-4" />
         <span className="hidden sm:inline">End</span>

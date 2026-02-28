@@ -97,22 +97,27 @@ export default function SetupForm() {
   );
 
   const inputClass =
-    'w-full px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors';
+    'w-full px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-600 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/20 transition-all duration-200';
 
   const selectClass =
-    'w-full px-3 py-2.5 text-sm text-slate-900 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors appearance-none cursor-pointer';
+    'w-full px-3.5 py-2.5 text-sm text-slate-100 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/20 transition-all duration-200 appearance-none cursor-pointer';
+
+  const modes = [
+    { value: 'realtime', label: 'Real-time' },
+    { value: 'push-to-talk', label: 'Push-to-Talk' },
+  ] as const;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* Lesson Details */}
-      <section>
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* ── Lesson Details ── */}
+      <section className="glass rounded-xl p-5">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-4">
           Lesson Details
         </h2>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Teacher Name <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">
+              Teacher Name <span className="text-cyan-400">*</span>
             </label>
             <input
               type="text"
@@ -124,8 +129,8 @@ export default function SetupForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Class Name <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">
+              Class Name <span className="text-cyan-400">*</span>
             </label>
             <input
               type="text"
@@ -137,9 +142,9 @@ export default function SetupForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">
               Subject
-              <span className="text-slate-400 font-normal ml-1">(optional)</span>
+              <span className="text-slate-600 font-normal ml-1">(optional)</span>
             </label>
             <input
               type="text"
@@ -151,9 +156,9 @@ export default function SetupForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">
               Course Outline
-              <span className="text-slate-400 font-normal ml-1">(optional)</span>
+              <span className="text-slate-600 font-normal ml-1">(optional)</span>
             </label>
             <textarea
               placeholder="Brief topics to cover today..."
@@ -166,17 +171,14 @@ export default function SetupForm() {
         </div>
       </section>
 
-      {/* Divider */}
-      <div className="border-t border-slate-200" />
-
-      {/* Languages */}
-      <section>
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">
+      {/* ── Languages ── */}
+      <section className="glass rounded-xl p-5">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-4">
           Languages
         </h2>
         <div className="flex items-end gap-3">
           <div className="flex-1">
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">
               Speak in
             </label>
             <select
@@ -193,11 +195,11 @@ export default function SetupForm() {
           </div>
 
           <div className="flex items-center justify-center w-10 h-10 shrink-0 mb-0.5">
-            <ArrowRight className="w-4 h-4 text-slate-400" />
+            <ArrowRight className="w-4 h-4 text-cyan-400 animate-pulse" />
           </div>
 
           <div className="flex-1">
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">
               Translate to
             </label>
             <select
@@ -215,12 +217,9 @@ export default function SetupForm() {
         </div>
       </section>
 
-      {/* Divider */}
-      <div className="border-t border-slate-200" />
-
-      {/* Voice */}
-      <section>
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">
+      {/* ── Voice ── */}
+      <section className="glass rounded-xl p-5">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-4">
           Voice
         </h2>
         <VoiceSelector
@@ -230,37 +229,47 @@ export default function SetupForm() {
         />
       </section>
 
-      {/* Divider */}
-      <div className="border-t border-slate-200" />
-
-      {/* Settings */}
-      <section>
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">
+      {/* ── Settings ── */}
+      <section className="glass rounded-xl p-5">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-4">
           Settings
         </h2>
         <div className="space-y-5">
-          {/* Mode */}
+          {/* Mode — Glass Segmented Control */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            <label className="block text-sm font-medium text-slate-300 mb-2">
               Translation Mode
             </label>
-            <select
-              value={settings.mode}
-              onChange={(e) => settings.setMode(e.target.value as 'realtime' | 'push-to-talk')}
-              className={selectClass}
-            >
-              <option value="realtime">Real-time -- Continuously listens and translates</option>
-              <option value="push-to-talk">Push-to-Talk -- Hold to speak, release to translate</option>
-            </select>
+            <div className="inline-flex rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
+              {modes.map((mode) => {
+                const isActive = settings.mode === mode.value;
+                return (
+                  <button
+                    key={mode.value}
+                    type="button"
+                    onClick={() => settings.setMode(mode.value)}
+                    className={`
+                      px-4 py-2 text-sm font-medium rounded-md transition-all duration-200
+                      ${isActive
+                        ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 glow-cyan-sm'
+                        : 'text-slate-400 hover:text-slate-200 border border-transparent'
+                      }
+                    `}
+                  >
+                    {mode.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Noise Cancellation */}
+          {/* Noise Cancellation Toggle */}
           <div className="flex items-center justify-between">
             <div>
-              <span className="block text-sm font-medium text-slate-700">
+              <span className="block text-sm font-medium text-slate-300">
                 Noise Cancellation
               </span>
-              <span className="block text-xs text-slate-400 mt-0.5">
+              <span className="block text-xs text-slate-500 mt-0.5">
                 Filter background noise
               </span>
             </div>
@@ -271,16 +280,22 @@ export default function SetupForm() {
               onClick={() => settings.setNoiseCancellation(!settings.noiseCancellation)}
               className={`
                 relative inline-flex items-center shrink-0
-                w-11 h-6 rounded-full transition-colors duration-200
-                focus:outline-none focus:ring-2 focus:ring-blue-600/20
-                ${settings.noiseCancellation ? 'bg-blue-600' : 'bg-slate-300'}
+                w-11 h-6 rounded-full transition-all duration-200
+                focus:outline-none focus:ring-1 focus:ring-cyan-400/30
+                ${settings.noiseCancellation
+                  ? 'bg-cyan-500/30 border border-cyan-400/40'
+                  : 'bg-white/10 border border-white/[0.08]'
+                }
               `}
             >
               <span
                 className={`
-                  w-[18px] h-[18px] rounded-full bg-white shadow-sm
-                  transition-transform duration-200
-                  ${settings.noiseCancellation ? 'translate-x-[22px]' : 'translate-x-[3px]'}
+                  w-[18px] h-[18px] rounded-full shadow-sm
+                  transition-all duration-200
+                  ${settings.noiseCancellation
+                    ? 'translate-x-[22px] bg-cyan-400'
+                    : 'translate-x-[3px] bg-slate-400'
+                  }
                 `}
               />
             </button>
@@ -288,7 +303,7 @@ export default function SetupForm() {
 
           {/* Microphone */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">
               <span className="inline-flex items-center gap-1.5">
                 <Mic className="w-3.5 h-3.5 text-slate-500" />
                 Microphone
@@ -307,7 +322,7 @@ export default function SetupForm() {
                 ))}
               </select>
             ) : (
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-slate-500">
                 No microphone detected. Please allow microphone access.
               </p>
             )}
@@ -315,29 +330,30 @@ export default function SetupForm() {
         </div>
       </section>
 
-      {/* Error */}
+      {/* ── Error ── */}
       {error && (
-        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-          <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
-          <p className="text-sm text-red-600 font-medium">
+        <div className="flex items-center gap-2.5 p-3.5 glass rounded-xl border-rose-500/30 bg-rose-500/10">
+          <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+          <p className="text-sm text-rose-300 font-medium">
             {error}
           </p>
         </div>
       )}
 
-      {/* Submit */}
+      {/* ── Submit ── */}
       <button
         type="submit"
         disabled={loading}
         className="
-          w-full py-3 px-4
-          bg-blue-600 hover:bg-blue-700
-          text-white text-sm font-semibold
-          rounded-lg
-          transition-colors duration-150
-          disabled:opacity-50 disabled:cursor-not-allowed
+          w-full h-12 px-4
+          bg-gradient-to-r from-cyan-500 to-cyan-400
+          text-dark-DEFAULT text-sm font-bold
+          rounded-xl
+          transition-all duration-200
+          hover:glow-cyan hover:brightness-110
+          disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none
           flex items-center justify-center gap-2
-          focus:outline-none focus:ring-2 focus:ring-blue-600/20
+          focus:outline-none focus:ring-2 focus:ring-cyan-400/30
         "
       >
         {loading ? (

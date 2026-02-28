@@ -10,9 +10,9 @@ interface VocabTableProps {
 }
 
 const difficultyStyles: Record<string, string> = {
-  easy: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-  medium: 'bg-amber-50 text-amber-700 border border-amber-200',
-  hard: 'bg-red-50 text-red-700 border border-red-200',
+  easy: 'bg-emerald-400/20 text-emerald-300',
+  medium: 'bg-amber-400/20 text-amber-300',
+  hard: 'bg-rose-400/20 text-rose-300',
 };
 
 export default function VocabTable({ sessionId }: VocabTableProps) {
@@ -49,7 +49,7 @@ export default function VocabTable({ sessionId }: VocabTableProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16 gap-3">
-        <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
+        <Loader2 className="w-5 h-5 text-cyan-400 animate-spin" />
         <p className="text-sm text-slate-500">Loading vocabulary...</p>
       </div>
     );
@@ -57,10 +57,10 @@ export default function VocabTable({ sessionId }: VocabTableProps) {
 
   if (error) {
     return (
-      <div className="border border-slate-200 rounded-lg p-6 bg-white">
+      <div className="rounded-xl bg-white/5 backdrop-blur border border-rose-500/30 p-6">
         <div className="flex items-center justify-center gap-2">
-          <AlertCircle className="w-5 h-5 text-red-500" />
-          <p className="text-sm text-red-600 font-medium">{error}</p>
+          <AlertCircle className="w-5 h-5 text-rose-400" />
+          <p className="text-sm text-rose-300 font-medium">{error}</p>
         </div>
       </div>
     );
@@ -69,7 +69,7 @@ export default function VocabTable({ sessionId }: VocabTableProps) {
   if (vocab.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3">
-        <BookOpen className="w-8 h-8 text-slate-300" />
+        <BookOpen className="w-8 h-8 text-slate-600" />
         <p className="text-sm text-slate-500">
           No vocabulary items found for this lesson.
         </p>
@@ -83,27 +83,27 @@ export default function VocabTable({ sessionId }: VocabTableProps) {
         {vocab.length} words found
       </p>
 
-      <div className="border border-slate-200 rounded-lg bg-white divide-y divide-slate-200">
+      <div className="rounded-xl bg-white/5 backdrop-blur border border-white/[0.08] divide-y divide-white/5">
         {vocab.map((item) => (
           <div key={item.id} className="flex items-center justify-between px-4 py-3">
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline gap-2">
-                <span className="font-medium text-slate-900">
+                <span className="font-medium text-slate-200">
                   {item.original}
                 </span>
                 {item.phonetic && (
-                  <span className="text-sm text-slate-400">
+                  <span className="text-sm text-slate-500">
                     /{item.phonetic}/
                   </span>
                 )}
               </div>
-              <p className="text-sm text-slate-500 mt-0.5">
+              <p className="text-sm text-slate-400 mt-0.5">
                 {item.translated}
               </p>
             </div>
             <span
               className={`
-                text-xs font-medium px-2 py-0.5 rounded-lg shrink-0 ml-3
+                text-xs font-medium px-2.5 py-0.5 rounded-full shrink-0 ml-3
                 ${difficultyStyles[item.difficulty] || ''}
               `}
             >
