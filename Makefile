@@ -41,6 +41,9 @@ install-pipeline:
 	which espeak-ng > /dev/null 2>&1 || (sudo apt-get update && sudo apt-get install -y espeak-ng)
 	cd services/pipeline && pip install -e .
 
+generate-voices:
+	cd services/pipeline && python scripts/generate_references.py
+
 # --- Build ---
 
 build-backend:
