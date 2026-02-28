@@ -37,13 +37,18 @@ class TranslateProcessor:
 
         inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True).to(self.device)
 
+        # Limit output length proportional to input to prevent hallucination
+        input_len = inputs["input_ids"].shape[1]
+        max_tokens = max(20, int(input_len * 3))
+
         with torch.no_grad():
             outputs = self.model.generate(
                 **inputs,
                 num_beams=2,
-                max_new_tokens=128,
+                max_new_tokens=max_tokens,
                 repetition_penalty=1.5,
                 no_repeat_ngram_size=3,
+                length_penalty=0.6,
             )
 
         result = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
