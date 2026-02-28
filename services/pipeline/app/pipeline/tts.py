@@ -1,6 +1,6 @@
-"""TTS — XTTS-v2 (natural voice cloning) with VITS/espeak-ng fallback.
+"""TTS — Kokoro (natural built-in voices) with VITS/espeak-ng fallback.
 
-Priority: XTTS-v2 → VITS → espeak-ng
+Priority: Kokoro → VITS → espeak-ng
 """
 
 import logging
@@ -12,11 +12,20 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-# XTTS-v2 supported languages
-_XTTS_LANGUAGES = {
-    "en": "en", "es": "es", "fr": "fr", "de": "de", "it": "it",
-    "pt": "pt", "pl": "pl", "tr": "tr", "ru": "ru", "nl": "nl",
-    "cs": "cs", "ar": "ar", "zh": "zh-cn", "ja": "ja", "hu": "hu", "ko": "ko",
+# Kokoro voice mapping — natural human voices
+_KOKORO_VOICES = {
+    "adult_female": "af_heart",      # warm, natural female
+    "adult_male": "am_adam",          # clear, natural male
+    "child_female": "af_bella",       # lighter female voice
+    "child_male": "am_michael",       # lighter male voice
+}
+
+# VITS fallback speakers (built-in, no reference needed)
+_VITS_SPEAKERS = {
+    "adult_female": "p225",
+    "adult_male": "p226",
+    "child_female": "p240",
+    "child_male": "p243",
 }
 
 # espeak-ng voice mapping
@@ -31,18 +40,15 @@ _ESPEAK_VOICES = {
     ("th", "child_female"): "th+f4",
 }
 
-# Reference text for auto-generating reference audio
-_REFERENCE_TEXTS = {
-    "en": "Hello everyone, welcome to today's class. Let's begin our lesson together.",
-    "th": "สวัสดีครับทุกคน ยินดีต้อนรับสู่ชั้นเรียนวันนี้ เรามาเริ่มบทเรียนกันเลยนะครับ",
-}
-
-# VITS fallback speakers
-_VITS_SPEAKERS = {
-    "adult_female": "p225",
-    "adult_male": "p226",
-    "child_female": "p240",
-    "child_male": "p243",
+# Kokoro language codes
+_KOKORO_LANG_CODES = {
+    "en": "a",   # American English
+    "th": "a",   # Thai not supported — use English voice for translated text
+    "es": "e",   # Spanish
+    "fr": "f",   # French
+    "ja": "j",   # Japanese
+    "ko": "k",   # Korean (if supported)
+    "zh": "z",   # Chinese
 }
 
 
@@ -65,17 +71,18 @@ class TtsProcessor:
         self.model = None
         self.sample_rate = 24000
         self._loaded = False
-        self._backend = None  # "xtts", "vits", "espeak"
+        self._backend = None  # "kokoro", "vits", "espeak"
+        self._kokoro_pipeline = None
 
     def load(self):
-        """Load TTS model. Try XTTS-v2 first, then VITS, then espeak-ng."""
+        """Load TTS model. Try Kokoro first, then VITS, then espeak-ng."""
 
-        # Patch before importing TTS
-        _patch_transformers()
-
-        # 1. Try XTTS-v2 (best quality, voice cloning)
-        if self._try_load_xtts():
+        # 1. Try Kokoro (best quality, built-in voices)
+        if self._try_load_kokoro():
             return
+
+        # Patch before importing coqui TTS
+        _patch_transformers()
 
         # 2. Try VITS (multi-speaker, decent quality)
         if self._try_load_vits():
@@ -87,24 +94,20 @@ class TtsProcessor:
 
         logger.warning("No TTS backend available")
 
-    def _try_load_xtts(self) -> bool:
+    def _try_load_kokoro(self) -> bool:
         try:
-            from TTS.api import TTS
+            from kokoro import KPipeline
 
-            logger.info("Loading XTTS-v2 on %s...", self.device)
-            self.model = TTS("tts_models/multilingual/multi-dataset/xtts_v2")
-            if self.device == "cuda":
-                self.model = self.model.to("cuda")
+            logger.info("Loading Kokoro TTS...")
+            self._kokoro_pipeline = KPipeline(lang_code='a')  # American English
+            self._kokoro_lang = 'a'
             self._loaded = True
-            self._backend = "xtts"
+            self._backend = "kokoro"
             self.sample_rate = 24000
-            logger.info("XTTS-v2 loaded on %s", self.device)
-
-            # Auto-generate reference audio if missing
-            self._ensure_reference_audio()
+            logger.info("Kokoro TTS loaded (48 built-in voices, 24kHz)")
             return True
         except Exception as e:
-            logger.warning("XTTS-v2 not available: %s", e)
+            logger.warning("Kokoro not available: %s", e)
             return False
 
     def _try_load_vits(self) -> bool:
@@ -137,27 +140,6 @@ class TtsProcessor:
             pass
         return False
 
-    def _ensure_reference_audio(self):
-        """Generate missing reference audio with espeak-ng for XTTS-v2."""
-        for (lang, voice_type), espeak_voice in _ESPEAK_VOICES.items():
-            voice_dir = self.voice_presets_dir / lang / voice_type
-            voice_dir.mkdir(parents=True, exist_ok=True)
-
-            wav_file = voice_dir / "reference.wav"
-            if wav_file.exists():
-                continue
-
-            text = _REFERENCE_TEXTS.get(lang, _REFERENCE_TEXTS["en"])
-            try:
-                subprocess.run(
-                    ["espeak-ng", "-v", espeak_voice, "-s", "130", "-w", str(wav_file), text],
-                    capture_output=True, timeout=10,
-                )
-                if wav_file.exists() and wav_file.stat().st_size > 100:
-                    logger.info("Created reference (espeak-ng): %s", wav_file)
-            except Exception as e:
-                logger.warning("Failed to generate reference for %s/%s: %s", lang, voice_type, e)
-
     def synthesize(self, text: str, voice: str = "adult_female", language: str = "en") -> bytes:
         """Synthesize text to speech. Returns PCM 16-bit mono audio bytes."""
         if not text.strip():
@@ -167,38 +149,46 @@ class TtsProcessor:
             logger.warning("[TTS] Not loaded → silence")
             return self._silence(text)
 
-        if self._backend == "xtts":
-            return self._synth_xtts(text, voice, language)
+        if self._backend == "kokoro":
+            return self._synth_kokoro(text, voice, language)
         elif self._backend == "vits":
             return self._synth_vits(text, voice)
         elif self._backend == "espeak":
             return self._synth_espeak(text, voice, language)
         return self._silence(text)
 
-    def _synth_xtts(self, text: str, voice: str, language: str) -> bytes:
-        """XTTS-v2 — natural voice cloning."""
-        xtts_lang = _XTTS_LANGUAGES.get(language)
-        if not xtts_lang:
-            logger.warning("[TTS] Language '%s' not supported by XTTS → VITS fallback", language)
-            return self._synth_espeak(text, voice, language)
-
-        ref_audio = self._find_reference(voice, language)
-        if not ref_audio:
-            logger.warning("[TTS] No reference for voice=%s lang=%s → espeak fallback", voice, language)
-            return self._synth_espeak(text, voice, language)
+    def _synth_kokoro(self, text: str, voice: str, language: str) -> bytes:
+        """Kokoro — natural built-in voices."""
+        kokoro_voice = _KOKORO_VOICES.get(voice, "af_heart")
+        lang_code = _KOKORO_LANG_CODES.get(language, "a")
 
         try:
-            logger.info("[TTS] XTTS-v2 [lang=%s, voice=%s]: %s", xtts_lang, voice, text[:80])
-            wav = self.model.tts(text=text, speaker_wav=ref_audio, language=xtts_lang)
+            # Re-create pipeline if language changed
+            if self._kokoro_lang != lang_code:
+                from kokoro import KPipeline
+                self._kokoro_pipeline = KPipeline(lang_code=lang_code)
+                self._kokoro_lang = lang_code
 
-            audio = np.array(wav, dtype=np.float32)
+            logger.info("[TTS] Kokoro [voice=%s, lang=%s]: %s", kokoro_voice, lang_code, text[:80])
+
+            # Generate audio — Kokoro yields chunks
+            audio_chunks = []
+            for _, _, audio in self._kokoro_pipeline(text, voice=kokoro_voice):
+                if audio is not None:
+                    audio_chunks.append(audio)
+
+            if not audio_chunks:
+                logger.warning("[TTS] Kokoro produced no audio")
+                return self._synth_espeak(text, voice, language)
+
+            audio = np.concatenate(audio_chunks)
             audio = np.clip(audio * 32768.0, -32768, 32767).astype(np.int16)
             pcm = audio.tobytes()
 
-            logger.info("[TTS] XTTS-v2 → %.1fs (%d bytes)", len(audio) / self.sample_rate, len(pcm))
+            logger.info("[TTS] Kokoro → %.1fs (%d bytes)", len(audio) / self.sample_rate, len(pcm))
             return pcm
         except Exception as e:
-            logger.exception("[TTS] XTTS-v2 failed: %s", e)
+            logger.exception("[TTS] Kokoro failed: %s", e)
             return self._synth_espeak(text, voice, language)
 
     def _synth_vits(self, text: str, voice: str) -> bytes:
@@ -245,26 +235,16 @@ class TtsProcessor:
                 pass
             return self._silence(text)
 
-    def _find_reference(self, voice: str, language: str) -> str | None:
-        """Find reference audio WAV for XTTS-v2."""
-        for lang in [language, "en"]:
-            voice_dir = self.voice_presets_dir / lang / voice
-            if voice_dir.exists():
-                for ext in ("*.wav", "*.mp3", "*.flac"):
-                    files = list(voice_dir.glob(ext))
-                    if files:
-                        return str(files[0])
-        return None
-
     def list_voices(self) -> list[dict]:
         """List available voices."""
         voices = []
-        for voice_type in _VITS_SPEAKERS:
+        for voice_type, kokoro_id in _KOKORO_VOICES.items():
             voices.append({
                 "id": f"en/{voice_type}",
                 "voice_type": voice_type,
                 "language": "en",
                 "name": voice_type.replace("_", " ").title(),
+                "kokoro_voice": kokoro_id,
                 "has_reference": True,
             })
         return voices

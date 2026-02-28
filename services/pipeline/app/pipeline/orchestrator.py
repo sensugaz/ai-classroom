@@ -44,7 +44,7 @@ class PipelineOrchestrator:
 
         t0 = time.time()
         self.tts.load()
-        logger.info("[LOAD] TTS (XTTS-v2): %.1fs", time.time() - t0)
+        logger.info("[LOAD] TTS: %.1fs", time.time() - t0)
 
         logger.info("All pipeline models loaded")
 
@@ -118,7 +118,7 @@ class PipelineOrchestrator:
                     "  ② VAD           : %7.0fms\n"
                     "  ③ STT (Whisper) : %7.0fms\n"
                     "  ④ Translate     : %7.0fms\n"
-                    "  ⑤ TTS (XTTS)   : %7.0fms\n"
+                    "  ⑤ TTS   : %7.0fms\n"
                     "  ─────────────────────────\n"
                     "  TOTAL           : %7.0fms (%.1fs)\n"
                     "  \"%s\" → \"%s\"",
@@ -187,7 +187,7 @@ class PipelineOrchestrator:
             "  ① Denoise       : %7.0fms\n"
             "  ② STT (Whisper) : %7.0fms\n"
             "  ③ Translate     : %7.0fms\n"
-            "  ④ TTS (XTTS)   : %7.0fms\n"
+            "  ④ TTS   : %7.0fms\n"
             "  ─────────────────────────\n"
             "  TOTAL           : %7.0fms (%.1fs)\n"
             "  \"%s\" → \"%s\"",
