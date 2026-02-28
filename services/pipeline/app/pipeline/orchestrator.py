@@ -19,11 +19,11 @@ class PipelineOrchestrator:
     def __init__(self):
         self.denoise = DenoiseProcessor()
         self.vad = VadProcessor(threshold=settings.vad_threshold)
-        self.stt = SttProcessor(api_key=settings.openai_api_key, model_size=settings.whisper_model, device=settings.device)
+        self.stt = SttProcessor(api_key=settings.elevenlabs_api_key, model_size=settings.whisper_model, device=settings.device)
         self.translate = TranslateProcessor(model_name=settings.translate_model, device=settings.device)
         self.tts = TtsProcessor(device=settings.device, voice_presets_dir=settings.voice_presets_dir)
         self.postprocess = SttPostProcessor(device=settings.device)
-        self._stt_label = "OpenAI" if settings.openai_api_key else "Whisper"
+        self._stt_label = "Scribe v2" if settings.elevenlabs_api_key else "Whisper"
 
     def load_models(self):
         """Load all models at startup."""
@@ -49,8 +49,8 @@ class PipelineOrchestrator:
         self.tts.load()
         logger.info("[LOAD] TTS: %.1fs", time.time() - t0)
 
-        # Only load post-processor for local Whisper (OpenAI has built-in post-processing)
-        self._use_postprocess = settings.stt_postprocess and not settings.openai_api_key
+        # Only load post-processor for local Whisper (Scribe v2 has built-in post-processing)
+        self._use_postprocess = settings.stt_postprocess and not settings.elevenlabs_api_key
         if self._use_postprocess:
             t0 = time.time()
             self.postprocess.load()

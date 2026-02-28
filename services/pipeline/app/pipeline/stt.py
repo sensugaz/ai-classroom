@@ -1,4 +1,4 @@
-"""OpenAI gpt-4o-transcribe STT via API."""
+"""ElevenLabs Scribe v2 STT via API, with local Whisper fallback."""
 
 import io
 import logging
@@ -17,11 +17,11 @@ class SttProcessor:
         self.model = None  # local whisper fallback
 
     def load(self):
-        """Load OpenAI client or fall back to local Whisper."""
+        """Load ElevenLabs client or fall back to local Whisper."""
         if self.api_key:
-            from openai import OpenAI
-            self.client = OpenAI(api_key=self.api_key)
-            logger.info("STT: OpenAI gpt-4o-transcribe ready")
+            from elevenlabs.client import ElevenLabs
+            self.client = ElevenLabs(api_key=self.api_key)
+            logger.info("STT: ElevenLabs Scribe v2 ready")
         else:
             from faster_whisper import WhisperModel
             compute_type = "float16" if self.device == "cuda" else "int8"
@@ -45,14 +45,14 @@ class SttProcessor:
             return ""
 
         if self.client:
-            return self._transcribe_openai(audio, language, sample_rate, duration)
+            return self._transcribe_elevenlabs(audio, language, sample_rate, duration)
         elif self.model:
             return self._transcribe_local(audio, language, sample_rate, duration)
         else:
             raise RuntimeError("STT model not loaded")
 
-    def _transcribe_openai(self, audio: np.ndarray, language: str, sample_rate: int, duration: float) -> str:
-        """Transcribe using OpenAI API."""
+    def _transcribe_elevenlabs(self, audio: np.ndarray, language: str, sample_rate: int, duration: float) -> str:
+        """Transcribe using ElevenLabs Scribe v2 API."""
         try:
             # Convert numpy to WAV in memory
             buf = io.BytesIO()
@@ -60,10 +60,20 @@ class SttProcessor:
             buf.seek(0)
             buf.name = "audio.wav"
 
-            result = self.client.audio.transcriptions.create(
-                model="gpt-4o-transcribe",
+            # Map 2-letter ISO-639-1 to 3-letter ISO-639-3 for ElevenLabs
+            lang_map = {
+                "th": "tha",
+                "en": "eng",
+                "zh": "cmn",
+                "ja": "jpn",
+            }
+            lang_code = lang_map.get(language, language)
+
+            result = self.client.speech_to_text.convert(
                 file=buf,
-                language=language,
+                model_id="scribe_v2",
+                language_code=lang_code,
+                tag_audio_events=False,
             )
 
             text = result.text.strip() if result.text else ""
@@ -76,10 +86,10 @@ class SttProcessor:
                 return ""
 
             if text:
-                logger.info("STT [%s] (%.1fs) OpenAI: %s", language, duration, text)
+                logger.info("STT [%s] (%.1fs) Scribe v2: %s", language, duration, text)
             return text
         except Exception as e:
-            logger.error("STT OpenAI failed: %s", e)
+            logger.error("STT ElevenLabs failed: %s", e)
             return ""
 
     def _transcribe_local(self, audio: np.ndarray, language: str, sample_rate: int, duration: float) -> str:

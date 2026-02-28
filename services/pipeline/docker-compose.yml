@@ -16,6 +16,7 @@ services:
     environment:
       - DEVICE=cuda
       - PORT=9000
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
     restart: unless-stopped
 
 volumes:
