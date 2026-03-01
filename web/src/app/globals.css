@@ -168,3 +168,83 @@ body.pwa-mode {
 .font-thai {
   font-family: 'Prompt', sans-serif;
 }
+
+/* ─── Audio Orb ─────────────────────────────────────────────── */
+
+.orb-gradient {
+  background: conic-gradient(
+    from 0deg,
+    rgba(6, 182, 212, 0.6),
+    rgba(139, 92, 246, 0.4),
+    rgba(6, 182, 212, 0.2),
+    rgba(139, 92, 246, 0.6),
+    rgba(6, 182, 212, 0.6)
+  );
+}
+
+.orb-gradient-active {
+  background: conic-gradient(
+    from 0deg,
+    rgba(6, 182, 212, 0.9),
+    rgba(139, 92, 246, 0.7),
+    rgba(6, 182, 212, 0.5),
+    rgba(139, 92, 246, 0.9),
+    rgba(6, 182, 212, 0.9)
+  );
+}
+
+.orb-gradient-processing {
+  background: conic-gradient(
+    from 0deg,
+    rgba(245, 158, 11, 0.9),
+    rgba(234, 88, 12, 0.6),
+    rgba(245, 158, 11, 0.4),
+    rgba(234, 88, 12, 0.9),
+    rgba(245, 158, 11, 0.9)
+  );
+}
+
+.orb-gradient-speaking {
+  background: conic-gradient(
+    from 0deg,
+    rgba(16, 185, 129, 0.9),
+    rgba(6, 182, 212, 0.6),
+    rgba(16, 185, 129, 0.4),
+    rgba(6, 182, 212, 0.9),
+    rgba(16, 185, 129, 0.9)
+  );
+}
+
+/* ─── Transcript bubbles ────────────────────────────────────── */
+
+.bubble-original {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bubble-translated {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.08) 0%, rgba(139, 92, 246, 0.04) 100%);
+  border: 1px solid rgba(6, 182, 212, 0.15);
+}
+
+/* ─── HUD scan line ─────────────────────────────────────────── */
+
+@keyframes hud-scan {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
+.hud-scanline {
+  animation: hud-scan 8s linear infinite;
+}
+
+/* ─── Grid pattern ──────────────────────────────────────────── */
+
+.grid-pattern {
+  background-image:
+    linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}

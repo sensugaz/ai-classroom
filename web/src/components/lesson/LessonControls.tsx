@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { useLessonStore } from '@/stores/lessonStore';
-import { useSettingsStore } from '@/stores/settingsStore';
 import type { TranslationMode } from '@/lib/types';
 import { Pause, Play, Radio, Hand, Square } from 'lucide-react';
 
@@ -19,63 +18,57 @@ export default function LessonControls({ onModeChange }: LessonControlsProps) {
   const resumeLesson = useLessonStore((s) => s.resumeLesson);
   const endLesson = useLessonStore((s) => s.endLesson);
   const setMode = useLessonStore((s) => s.setMode);
-  const noiseCancellation = useSettingsStore((s) => s.noiseCancellation);
-  const setNoiseCancellation = useSettingsStore((s) => s.setNoiseCancellation);
 
   const handlePauseResume = () => {
-    if (status === 'active') {
-      pauseLesson();
-    } else if (status === 'paused') {
-      resumeLesson();
-    }
+    if (status === 'active') pauseLesson();
+    else if (status === 'paused') resumeLesson();
   };
 
   const handleModeSwitch = () => {
-    const newMode: TranslationMode =
-      mode === 'realtime' ? 'push-to-talk' : 'realtime';
+    const newMode: TranslationMode = mode === 'realtime' ? 'push-to-talk' : 'realtime';
     setMode(newMode);
     onModeChange?.(newMode);
   };
 
   const handleEnd = () => {
     endLesson();
-    if (sessionId) {
-      router.push(`/lesson/${sessionId}/review`);
-    }
+    if (sessionId) router.push(`/lesson/${sessionId}/review`);
   };
 
   return (
-    <div className="flex items-center justify-between px-4 py-2">
+    <div className="flex items-center justify-between px-6 py-3">
       {/* Pause / Resume */}
       <button
         type="button"
         onClick={handlePauseResume}
         disabled={status !== 'active' && status !== 'paused'}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-400 hover:text-slate-200 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        className="group relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium
+          text-slate-400 hover:text-slate-100
+          transition-all duration-200
+          hover:bg-white/5
+          disabled:opacity-30 disabled:cursor-not-allowed"
       >
         {status === 'paused' ? (
           <>
-            <Play className="w-4 h-4" />
+            <Play className="w-4 h-4 text-cyan-400 group-hover:text-cyan-300" />
             <span className="hidden sm:inline">Resume</span>
           </>
         ) : (
           <>
-            <Pause className="w-4 h-4" />
+            <Pause className="w-4 h-4 group-hover:text-slate-200" />
             <span className="hidden sm:inline">Pause</span>
           </>
         )}
       </button>
 
-      {/* Mode Toggle - Glass Segmented Control */}
-      <div className="flex items-center bg-white/5 rounded-lg p-0.5">
+      {/* Mode Toggle - Pill Segmented */}
+      <div className="flex items-center glass rounded-full p-1">
         <button
           type="button"
-          onClick={() => {
-            if (mode !== 'realtime') handleModeSwitch();
-          }}
-          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+          onClick={() => { if (mode !== 'realtime') handleModeSwitch(); }}
+          className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-300 ${
             mode === 'realtime'
-              ? 'bg-white/10 text-cyan-400'
+              ? 'bg-gradient-to-r from-cyan-500/20 to-violet-500/20 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.2)]'
               : 'text-slate-500 hover:text-slate-300'
           }`}
         >
@@ -84,12 +77,10 @@ export default function LessonControls({ onModeChange }: LessonControlsProps) {
         </button>
         <button
           type="button"
-          onClick={() => {
-            if (mode !== 'push-to-talk') handleModeSwitch();
-          }}
-          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+          onClick={() => { if (mode !== 'push-to-talk') handleModeSwitch(); }}
+          className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-300 ${
             mode === 'push-to-talk'
-              ? 'bg-white/10 text-cyan-400'
+              ? 'bg-gradient-to-r from-cyan-500/20 to-violet-500/20 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.2)]'
               : 'text-slate-500 hover:text-slate-300'
           }`}
         >
@@ -102,7 +93,10 @@ export default function LessonControls({ onModeChange }: LessonControlsProps) {
       <button
         type="button"
         onClick={handleEnd}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg transition-colors"
+        className="group flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium
+          text-rose-400/80 hover:text-rose-300
+          transition-all duration-200
+          hover:bg-rose-500/10"
       >
         <Square className="w-4 h-4" />
         <span className="hidden sm:inline">End</span>
