@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     port: int = 9000
     device: str = _default_device()
     whisper_model: str = "large-v3"
-    translate_model: str = "facebook/nllb-200-distilled-600M"
+    translate_model: str = "facebook/nllb-200-3.3B"
     vad_threshold: float = 0.5
     sample_rate: int = 16000
     tts_sample_rate: int = 24000
